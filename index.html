@@ -51,7 +51,9 @@
   .vjp.o { color: transparent; -webkit-text-stroke: 1px var(--ink); opacity: .16; }
 
   /* ---------- nav ---------- */
-  nav { position: fixed; inset: 0 0 auto; z-index: 60; height: 60px; background: rgba(7,8,11,.78); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  nav { position: fixed; inset: 0 0 auto; z-index: 60; height: 60px; background: rgba(7,8,11,.78); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(20px) saturate(160%); }
+  nav::after { content: ""; position: absolute; left: 0; right: 0; bottom: -14px; height: 14px; pointer-events: none; background: linear-gradient(rgba(7,8,11,.6), transparent); opacity: 0; transition: opacity .3s; }
+  nav.scrolled::after { opacity: 1; }
   nav .wrap { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .brand { font-family: var(--disp); font-weight: 900; font-size: 1.05rem; letter-spacing: .04em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; white-space: nowrap; color: var(--ink); }
   .brand small { font-family: var(--jp); font-weight: 500; font-size: .7rem; color: var(--muted); letter-spacing: .1em; }
@@ -68,7 +70,7 @@
   nav.open #menu span::after { transform: translateY(-6px) rotate(-45deg); }
   @media (max-width: 820px) {
     #menu { display: grid; }
-    nav ul { position: fixed; top: 60px; left: 0; right: 0; flex-direction: column; gap: 0; background: rgba(7,8,11,.97); border-bottom: 1px solid var(--line); padding: 8px var(--gut) 20px; transform: translateY(-8px); opacity: 0; visibility: hidden; transition: .3s var(--ease); }
+    nav ul { position: fixed; top: 60px; left: 0; right: 0; flex-direction: column; gap: 0; background: rgba(7,8,11,.97); border-bottom: 1px solid var(--line); padding: 8px var(--gut) 20px; transform: translateY(-8px) scaleY(.98); transform-origin: top right; opacity: 0; visibility: hidden; transition: transform .3s var(--ease), opacity .25s var(--ease), visibility .3s; }
     nav.open ul { transform: none; opacity: 1; visibility: visible; }
     nav ul a { flex-direction: row; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
     nav ul a i { font-size: .8rem; }
@@ -99,7 +101,7 @@
   .hero { min-height: 100svh; display: flex; align-items: center; padding: 100px 0 64px; }
   .hero .wrap { display: grid; grid-template-columns: 1fr; gap: 40px; width: 100%; }
   @media (min-width: 960px) { .hero .wrap { grid-template-columns: 1.3fr .7fr; align-items: end; } }
-  .namestack { font-family: var(--disp); font-weight: 900; text-transform: uppercase; line-height: .86; letter-spacing: -.02em; font-size: clamp(3.1rem, 17vw, 8.4rem); }
+  .namestack { font-family: var(--disp); font-weight: 900; text-transform: uppercase; line-height: .86; letter-spacing: -.03em; font-size: clamp(3.1rem, 17vw, 8.4rem); }
   .namestack .solid { color: var(--ink); display: block; text-shadow: 0 0 40px rgba(143,180,255,.18); }
   .namestack .ol { display: block; color: transparent; -webkit-text-stroke: 1.2px var(--ink); }
   .namestack .ol:nth-child(2) { opacity: .7; } .namestack .ol:nth-child(3) { opacity: .42; } .namestack .ol:nth-child(4) { opacity: .18; }
@@ -204,7 +206,7 @@
   @media (min-width: 600px) { .loadout { grid-template-columns: 1fr 1fr; } }
   @media (min-width: 1000px) { .loadout { grid-template-columns: repeat(4, 1fr); gap: 16px; } }
   .slot { background: rgba(12,15,21,.85); border: 1px solid var(--line); border-radius: 20px; padding: 24px 22px; transition: border-color .3s, transform .3s var(--ease); position: relative; overflow: hidden; }
-  .slot:hover { border-color: var(--ink-soft); transform: translateY(-3px); }
+  .slot:hover { border-color: var(--ink-soft); }
   .slot .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
   .slot .key { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--ink); border-radius: 10px; color: var(--ink); font-weight: 900; }
   .slot .jk { font-family: var(--jp); font-weight: 900; font-size: 2.2rem; line-height: 1; color: transparent; -webkit-text-stroke: 1px rgba(143,180,255,.3); }
@@ -220,7 +222,7 @@
   @media (min-width: 600px) { .repos { grid-template-columns: 1fr 1fr; } }
   @media (min-width: 960px) { .repos { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
   .repo { background: rgba(12,15,21,.85); border: 1px solid var(--line); border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 10px; transition: border-color .3s, transform .3s var(--ease); min-width: 0; }
-  .repo:hover { border-color: var(--ink-soft); transform: translateY(-3px); }
+  .repo:hover { border-color: var(--ink-soft); }
   .repo h5 { font-weight: 800; text-transform: uppercase; font-size: .98rem; letter-spacing: .03em; overflow-wrap: anywhere; color: var(--fg); }
   .repo p { color: var(--muted); font-size: .86rem; flex: 1; }
   .repo .meta { font-family: var(--mono); font-size: .68rem; color: var(--ink-soft); letter-spacing: .08em; display: flex; justify-content: space-between; gap: 8px; }
@@ -236,11 +238,15 @@
   .rift::after { inset: 28%; border-style: solid; border-color: rgba(143,180,255,.07); }
   @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
   /* ---------- scroll companion: follows you, narrates the section ---------- */
-  #hud { position: fixed; z-index: 70; left: 20px; bottom: 20px; width: 300px; display: flex; gap: 14px; align-items: center;
-    padding: 12px 16px 12px 12px; background: rgba(7,8,11,.86); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
-    border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 10px 40px rgba(0,0,0,.5);
-    transform: translateY(0); transition: transform .5s var(--ease), opacity .5s var(--ease); }
-  #hud.hide { transform: translateY(140%); opacity: 0; }
+  #hud { position: fixed; z-index: 70; left: 0; top: 0; width: 300px; display: flex; gap: 14px; align-items: center;
+    padding: 14px 16px 12px 12px; background: rgba(7,8,11,.72); -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid var(--line); border-top-color: rgba(143,180,255,.28); border-radius: 18px; box-shadow: 0 14px 44px rgba(0,0,0,.55);
+    touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; visibility: hidden;
+    transition: opacity .35s var(--ease), transform .35s var(--ease), filter .35s var(--ease), box-shadow .2s; will-change: translate; }
+  #hud.ready { visibility: visible; }
+  #hud.grab { cursor: grabbing; transform: scale(1.03); box-shadow: 0 22px 60px rgba(0,0,0,.65), 0 0 0 1px rgba(143,180,255,.35); transition: transform .1s ease-out, box-shadow .1s; }
+  #hud.hide { opacity: 0; transform: scale(.94); filter: blur(6px); pointer-events: none; }
+  #hud::before { content: ""; position: absolute; top: 5px; left: 50%; width: 30px; height: 3px; margin-left: -15px; border-radius: 3px; background: rgba(143,180,255,.3); }
   #hud .orb { position: relative; width: 58px; height: 58px; flex-shrink: 0; }
   #hud .orb svg { position: absolute; inset: 0; width: 100%; height: 100%; }
   #hud .spin1 { animation: hspin 6s linear infinite; transform-origin: 50% 50%; }
@@ -271,12 +277,27 @@
   #rail a:hover span { opacity: 1; }
   @media (max-width: 960px) { #rail { display: none; } }
   @media (max-width: 600px) {
-    #hud { left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); width: auto; padding: 8px 12px 8px 8px; gap: 10px; border-radius: 14px; }
+    #hud { width: calc(100vw - 20px); padding: 12px 12px 8px 8px; gap: 10px; border-radius: 16px; }
     #hud .orb { width: 44px; height: 44px; } #hud .glyph { font-size: 1rem; }
     #hud .h-title { font-size: .82rem; } #hud .h-desc { font-size: .7rem; min-height: 0; }
     footer { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
   }
   @media (prefers-reduced-motion: reduce) { #hud .spin1, #hud .spin2 { animation: none; } #hud.swap .glyph, #hud.swap .h-title { animation: none; } }
+
+  /* ---------- apple-style response: feedback on press, not release ---------- */
+  .btn, #menu, .repo, .pill, #rail a { -webkit-tap-highlight-color: transparent; }
+  .btn:active { transform: scale(.97); transition: transform .1s ease-out, background .25s; }
+  #menu:active { transform: scale(.92); transition: transform .1s ease-out; }
+  .repo:active, .slot:active { filter: brightness(1.15); }
+  .tilt { transform-style: preserve-3d; will-change: transform; }
+  @media (prefers-reduced-transparency: reduce) {
+    nav, #hud, nav ul { background: var(--bg) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  }
+  @media (prefers-contrast: more) {
+    :root { --line: rgba(143,180,255,.5); --muted: #b5c0d6; }
+    nav, #hud { background: var(--bg); }
+  }
+  @media (prefers-reduced-motion: reduce) { #hud, #hud.grab, #hud.hide { transform: none; filter: none; transition: opacity .2s; } }
 
   footer { border-top: 1px solid var(--line); padding: 24px 0 calc(24px + env(safe-area-inset-bottom)); font-family: var(--mono); font-size: .7rem; color: var(--muted); letter-spacing: .06em; position: relative; z-index: 1; }
   footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
@@ -588,11 +609,122 @@
     ring.style.strokeDashoffset = 169.6 * (1 - (max > 0 ? scrollY / max : 0));
     // tuck it away while the mobile menu is open
     hud.classList.toggle('hide', nav.classList.contains('open'));
+    nav.classList.toggle('scrolled', scrollY > 8);
   }
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', onScroll);
   menu.addEventListener('click', onScroll);
   onScroll();
+
+  /* ---------- Apple-style springs (damping ratio + response, interruptible, velocity-aware) ---------- */
+  function Spring(x, { response = .4, damping = 1 } = {}) { return { x, v: 0, to: x, response, damping }; }
+  function stepSpring(s, dt) {
+    const k = Math.pow(2 * Math.PI / s.response, 2), c = 4 * Math.PI * s.damping / s.response;
+    s.v += (-k * (s.x - s.to) - c * s.v) * dt; s.x += s.v * dt;
+    return Math.abs(s.x - s.to) > .1 || Math.abs(s.v) > .1;
+  }
+
+  /* ---------- drag / flick the companion to any corner ---------- */
+  (() => {
+    const M = 14, NAVH = 60, de = document.documentElement;
+    const VW = () => de.clientWidth, VH = () => de.clientHeight;  // visible area, excludes browser chrome
+    const sx = Spring(0), sy = Spring(0);
+    let dragging = false, raf = 0, hist = [], grab = { x: 0, y: 0 }, moved = false, start = { x: 0, y: 0 };
+    let corner = { h: 'left', v: 'bottom' };
+    const size = () => ({ w: hud.offsetWidth, h: hud.offsetHeight });
+    const safeB = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sab')) || 0;
+    function snaps() {
+      const { w, h } = size(), W = VW(), H = VH(), full = w > W - 40;
+      const xs = full ? [(W - w) / 2] : [M, W - w - M - (W > 960 ? 40 : 0)];
+      const ys = [NAVH + M, H - h - M - safeB()];
+      return xs.flatMap(x => ys.map(y => ({ x, y, h: x === xs[0] ? 'left' : 'right', v: y === ys[0] ? 'top' : 'bottom' })));
+    }
+    const place = () => { hud.style.translate = `${sx.x}px ${sy.x}px`; };
+    function home() { const t = snaps().find(p => p.v === corner.v && (p.h === corner.h || snaps().length === 2)) || snaps()[0]; sx.to = t.x; sy.to = t.y; }
+    function loop(t0) {
+      let last = t0;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(function f(t) {
+        const dt = Math.min((t - last) / 1000, 1 / 30); last = t;
+        const a = stepSpring(sx, dt), b = stepSpring(sy, dt); place();
+        if (!dragging && (a || b)) raf = requestAnimationFrame(f); else if (!dragging) { sx.x = sx.to; sy.x = sy.to; place(); }
+      });
+    }
+    // momentum projection, Apple's exponential-decay form
+    const project = (v, d = .998) => (v / 1000) * d / (1 - d);
+    // rubber-band past the screen edges instead of a hard stop
+    const rubber = (o, dim, c = .55) => (o * dim * c) / (dim + c * Math.abs(o));
+    function clampSoft(v, lo, hi, dim) { return v < lo ? lo + rubber(v - lo, dim) : v > hi ? hi + rubber(v - hi, dim) : v; }
+
+    hud.addEventListener('pointerdown', e => {
+      dragging = true; moved = false; cancelAnimationFrame(raf);
+      hud.setPointerCapture(e.pointerId); hud.classList.add('grab');
+      // interrupt from the live on-screen value, keep the grab offset
+      grab = { x: e.clientX - sx.x, y: e.clientY - sy.x }; start = { x: e.clientX, y: e.clientY };
+      hist = [{ x: e.clientX, y: e.clientY, t: performance.now() }];
+    });
+    hud.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      if (!moved && Math.hypot(e.clientX - start.x, e.clientY - start.y) < 6) return;  // small hysteresis
+      moved = true;
+      const { w, h } = size();
+      sx.x = clampSoft(e.clientX - grab.x, M, VW() - w - M, VW());
+      sy.x = clampSoft(e.clientY - grab.y, NAVH + M, VH() - h - M, VH());
+      sx.v = sy.v = 0; place();
+      hist.push({ x: e.clientX, y: e.clientY, t: performance.now() }); if (hist.length > 6) hist.shift();
+    });
+    function release() {
+      if (!dragging) return; dragging = false; hud.classList.remove('grab');
+      const a = hist[0], b = hist[hist.length - 1], dt = Math.max((b.t - a.t) / 1000, .016);
+      const vx = moved ? (b.x - a.x) / dt : 0, vy = moved ? (b.y - a.y) / dt : 0;
+      const px = sx.x + project(vx), py = sy.x + project(vy);
+      const t = snaps().reduce((best, p) => Math.hypot(p.x - px, p.y - py) < Math.hypot(best.x - px, best.y - py) ? p : best);
+      corner = { h: t.h, v: t.v };
+      const flick = Math.hypot(vx, vy) > 500;
+      // bounce only when the gesture carried momentum; hand the finger's velocity to the spring
+      sx.damping = sy.damping = flick ? .8 : 1; sx.response = sy.response = .4;
+      sx.to = t.x; sy.to = t.y; sx.v = vx; sy.v = vy;
+      loop(performance.now());
+    }
+    hud.addEventListener('pointerup', release);
+    hud.addEventListener('pointercancel', release);
+    // re-target only; if the spring is mid-flight, let it carry on to the new target
+    const resnap = () => { if (dragging) return; home(); if (Math.abs(sx.v) + Math.abs(sy.v) > 1) return; sx.x = sx.to; sy.x = sy.to; sx.v = sy.v = 0; place(); };
+    addEventListener('resize', resnap);
+    // the panel's height changes as fonts load and the description types out
+    if ('ResizeObserver' in window) new ResizeObserver(resnap).observe(hud);
+    home(); sx.x = sx.to; sy.x = sy.to; place(); hud.classList.add('ready');
+  })();
+
+  /* ---------- subtle spring tilt on cards that follows the pointer (mouse only) ---------- */
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches && !still) {
+    const live = new Map();
+    function tiltLoop(el) {
+      const st = live.get(el); let last = performance.now();
+      cancelAnimationFrame(st.raf);
+      st.raf = requestAnimationFrame(function f(t) {
+        const dt = Math.min((t - last) / 1000, 1 / 30); last = t;
+        const a = stepSpring(st.rx, dt), b = stepSpring(st.ry, dt), c = stepSpring(st.lift, dt);
+        el.style.transform = `perspective(900px) rotateX(${st.rx.x}deg) rotateY(${st.ry.x}deg) translateY(${st.lift.x}px)`;
+        if (a || b || c) st.raf = requestAnimationFrame(f); else if (!st.lift.to) el.style.transform = '';
+      });
+    }
+    function state(el) {
+      if (!live.has(el)) { el.classList.add('tilt'); live.set(el, { rx: Spring(0, { response: .35 }), ry: Spring(0, { response: .35 }), lift: Spring(0, { response: .35 }), raf: 0 }); }
+      return live.get(el);
+    }
+    document.addEventListener('pointermove', e => {
+      const el = e.target.closest('.slot, .repo, .tile'); if (!el) return;
+      const r = el.getBoundingClientRect(), st = state(el);
+      st.ry.to = ((e.clientX - r.left) / r.width - .5) * 6;
+      st.rx.to = -((e.clientY - r.top) / r.height - .5) * 6;
+      st.lift.to = -4; tiltLoop(el);
+    });
+    document.addEventListener('pointerout', e => {
+      const el = e.target.closest('.slot, .repo, .tile'); if (!el || el.contains(e.relatedTarget)) return;
+      const st = state(el); st.rx.to = st.ry.to = st.lift.to = 0; tiltLoop(el);
+    });
+  }
 
   // live GitHub data — finance/quant repos excluded on purpose
   const USER = 'Ankush-Manhas840', COLORS = ['#8fb4ff', '#e4ebf7', '#4f6fb3', '#7d8aa3', '#c9dcff', '#2f4675'];
