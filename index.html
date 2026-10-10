@@ -172,7 +172,7 @@
   .row { display: grid; grid-template-columns: minmax(120px, 210px) 1fr 64px; gap: 14px; align-items: center; margin-bottom: 12px; font-size: .95rem; }
   .row .lab { color: var(--muted); }
   .row .bt { height: 12px; border-radius: 12px; background: var(--line); overflow: hidden; }
-  .row .bf { height: 100%; border-radius: 12px; background: var(--muted); transform: scaleX(0); transform-origin: left;
+  .row .bf { display: block; height: 100%; border-radius: 12px; background: var(--muted); transform: scaleX(0); transform-origin: left;
     transition: transform 1.3s var(--ease); transition-delay: var(--d, 0s); }
   .row.hi .bf { background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
   .row.hi .lab, .row.hi .val { color: var(--fg); font-weight: 600; }
@@ -292,6 +292,55 @@
     .tile { min-height: 180px; }
   }
 
+  /* ---------- split headings: words rise out of a mask ---------- */
+  .split .sw { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .08em; margin-bottom: -.08em; }
+  .split .sw > span { display: inline-block; transform: translate3d(0, 105%, 0) rotate(4deg); transform-origin: left bottom;
+    transition: transform 1s var(--ease); transition-delay: var(--d, 0s); }
+  .split.in .sw > span { transform: none; }
+
+  /* ---------- reel: photo belts + big line ---------- */
+  .reel { padding: 120px 0 90px; overflow: hidden; }
+  .belt { margin-top: 22px; overflow: visible; }
+  .reel .belt:first-of-type { margin-top: 56px; }
+  .belt-in { display: flex; gap: 18px; width: max-content; will-change: transform; }
+  .ph { flex: none; width: clamp(220px, 28vw, 380px); aspect-ratio: 3 / 2; border-radius: 22px; overflow: hidden; background: var(--line);
+    box-shadow: var(--shadow); transform: translateZ(0); }
+  .ph img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.06); transition: transform 1.2s var(--ease); }
+  @media (hover: hover) { .ph:hover img { transform: scale(1.14); } }
+  .bigline { margin-top: 70px; white-space: nowrap; }
+  .bigline-in { display: inline-block; will-change: transform; font-family: var(--display); font-weight: 700; letter-spacing: -.04em;
+    font-size: clamp(3.2rem, 11vw, 9rem); line-height: 1; color: transparent; -webkit-text-stroke: 1.5px var(--muted); }
+  .bigline-in i { font-style: normal; -webkit-text-stroke: 0; color: var(--accent); margin: 0 .35em; font-size: .5em; vertical-align: .35em; }
+
+  /* ---------- project photo mosaics ---------- */
+  .mosaic { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; height: clamp(240px, 38vw, 420px); margin-bottom: 34px; }
+  .mosaic .m { border-radius: 18px; overflow: hidden; position: relative; clip-path: inset(100% 0 0 0 round 18px);
+    transition: clip-path 1.3s var(--ease); transition-delay: var(--d, 0s); }
+  .mosaic .big { grid-row: 1 / 3; }
+  .mosaic .sm1 { --d: .15s; } .mosaic .sm2 { --d: .3s; }
+  .mosaic.in .m { clip-path: inset(0 0 0 0 round 18px); }
+  .mosaic img, .cbg img { position: absolute; left: 0; width: 100%; top: -12%; height: 124%; object-fit: cover; display: block; will-change: transform; }
+  .mosaic .m img { scale: 1.15; transition: scale 1.6s var(--ease); }
+  .mosaic.in .m img { scale: 1; }
+  @media (max-width: 560px) { .mosaic { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; height: 340px; gap: 8px; } .mosaic .big { grid-row: auto; grid-column: 1 / -1; } }
+
+  /* ---------- contact backdrop ---------- */
+  .contact { position: relative; overflow: hidden; isolation: isolate; }
+  .cbg { position: absolute; inset: 0; z-index: -1; }
+  .cbg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(var(--bg) 0%, color-mix(in srgb, var(--bg) 82%, transparent) 40%, color-mix(in srgb, var(--bg) 70%, transparent) 70%, var(--bg) 100%); }
+
+  /* ---------- final values appear instead of counting ---------- */
+  .stat b { transition: opacity .9s var(--ease), filter .9s var(--ease), transform .9s var(--ease); transition-delay: .3s; }
+  .card:not(.in) .stat b { opacity: 0; filter: blur(8px); transform: translateY(10px); }
+  .kpi b.pop { animation: pop .9s var(--ease) both; }
+  @keyframes pop { from { opacity: 0; filter: blur(8px); transform: translateY(10px) scale(.96); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .split .sw > span, .mosaic .m { transform: none !important; clip-path: none !important; transition: none !important; }
+    .mosaic .m img { scale: 1 !important; transition: none !important; }
+    .belt-in, .bigline-in, [data-par] img { transform: none !important; }
+  }
+
   /* ---------- footer ---------- */
   .contact { text-align: center; padding: 140px 0 120px; }
   .contact h2 { margin: 0 auto; }
@@ -351,33 +400,32 @@
   <div class="scroll-hint" aria-hidden="true">Scroll<i></i></div>
 </header>
 
-<!-- SCROLL STORY -->
-<section class="story" id="story" aria-label="How the crop model's error fell from 107.63 to 2.04">
-  <div class="pin">
-    <div class="wrap">
-      <div class="label">Crop yield model · test error (MAE, tonnes/hectare)</div>
-      <div class="num"><span id="storyNum">107.63</span><span class="unit">t/ha</span></div>
-      <div class="track"><div class="bar" id="storyBar"></div></div>
-      <div class="steps">
-        <div class="step on" data-s="0"><b>Linear baseline</b><span>A deliberately weak bar to beat</span></div>
-        <div class="step" data-s="1"><b>Random forest</b><span>100 trees, one-hot features</span></div>
-        <div class="step" data-s="2"><b>Found the outliers</b><span>Per-crop error breakdown</span></div>
-      </div>
-      <div class="drop" id="storyDrop">&nbsp;</div>
-    </div>
+<!-- REEL -->
+<section class="reel" id="reel" aria-label="Photo reel">
+  <div class="wrap">
+    <div class="kicker rv">Where the data comes from</div>
+    <h2 class="split">Fields, roads, <span class="soft">and the numbers behind them.</span></h2>
   </div>
+  <div class="belt" data-dir="-1" data-speed="38"><div class="belt-in"><figure class="ph"><img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=480&q=70" alt="Wheat field at sunset" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=480&q=70" alt="Young maize rows" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1530267981375-f0de937f5f13?auto=format&fit=crop&w=480&q=70" alt="Tractor harvesting a field" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=480&q=70" alt="Wheat grains" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=480&q=70" alt="Crop rows in soil" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1499529112087-3cb3b73cec95?auto=format&fit=crop&w=480&q=70" alt="Golden wheat ears" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=480&q=70" alt="Green farmland" fetchpriority="low" decoding="async"></figure></div></div>
+  <div class="belt" data-dir="1" data-speed="30"><div class="belt-in"><figure class="ph"><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=480&q=70" alt="Car on a highway" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=480&q=70" alt="Analytics dashboard" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=480&q=70" alt="Driving a car" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=480&q=70" alt="Charts on a laptop" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=480&q=70" alt="Sedan on a road" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=480&q=70" alt="Data metrics screen" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=480&q=70" alt="Hand-drawn chart" fetchpriority="low" decoding="async"></figure><figure class="ph"><img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=480&q=70" alt="Circuit board" fetchpriority="low" decoding="async"></figure></div></div>
+  <div class="bigline" aria-hidden="true"><div class="bigline-in">Clean data<i>✦</i>Baselines first<i>✦</i>Error by group<i>✦</i>Honest limits<i>✦</i>Deployed models<i>✦</i></div></div>
 </section>
 
 <!-- WORK -->
 <section id="work">
   <div class="wrap">
     <div class="kicker rv">Selected work</div>
-    <h2 class="rv" style="--d:.08s">Two deployed models. <span class="soft">Each one debugged down to the row.</span></h2>
+    <h2 class="split">Two deployed models. <span class="soft">Each one debugged down to the row.</span></h2>
 
     <div class="projects">
       <!-- Crop -->
       <article class="card rv tilt">
         <div class="glare"></div>
+        <div class="mosaic">
+          <div class="m big" data-par="-0.08"><img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=70" alt="Wheat field at sunset" loading="lazy" decoding="async"></div>
+          <div class="m sm1" data-par="0.06"><img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=600&q=70" alt="Young maize rows" loading="lazy" decoding="async"></div>
+          <div class="m sm2" data-par="0.12"><img src="https://images.unsplash.com/photo-1530267981375-f0de937f5f13?auto=format&fit=crop&w=600&q=70" alt="Tractor in a field" loading="lazy" decoding="async"></div>
+        </div>
         <div class="card-head">
           <h3>Crop Yield Prediction</h3>
           <span class="pill">Live on Streamlit</span>
@@ -411,6 +459,11 @@
       <!-- Car -->
       <article class="card rv tilt">
         <div class="glare"></div>
+        <div class="mosaic">
+          <div class="m big" data-par="-0.08"><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=70" alt="Car on a highway" loading="lazy" decoding="async"></div>
+          <div class="m sm1" data-par="0.06"><img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=600&q=70" alt="Driving a car" loading="lazy" decoding="async"></div>
+          <div class="m sm2" data-par="0.12"><img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=600&q=70" alt="Sedan on a road" loading="lazy" decoding="async"></div>
+        </div>
         <div class="card-head">
           <h3>Used Car Price Prediction</h3>
           <span class="pill">Live on Streamlit</span>
@@ -454,7 +507,7 @@
 <section class="alt" id="dashboard">
   <div class="wrap">
     <div class="kicker rv">Dashboard</div>
-    <h2 class="rv" style="--d:.08s">The numbers, live. <span class="soft">Pulled straight from GitHub.</span></h2>
+    <h2 class="split">The numbers, live. <span class="soft">Pulled straight from GitHub.</span></h2>
     <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent-2)"/><stop offset="1" stop-color="var(--accent)"/></linearGradient></defs></svg>
     <div class="dash" id="dash">
       <div class="panel kpi"><div class="live">Live</div><b id="kRepos">–</b><span>public repositories</span></div>
@@ -491,7 +544,7 @@
 <section class="alt" id="method">
   <div class="wrap">
     <div class="kicker rv">Method</div>
-    <h2 class="rv" style="--d:.08s">A good score isn't the finish line. <span class="soft">It's where I start asking questions.</span></h2>
+    <h2 class="split">A good score isn't the finish line. <span class="soft">It's where I start asking questions.</span></h2>
     <div class="tiles">
       <div class="tile rv" style="--d:0s">
         <div class="ic"><svg viewBox="0 0 44 44" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="38" x2="38" y2="38"/><path d="M8 30 L20 22 L28 26 L38 10"/></svg></div>
@@ -517,7 +570,7 @@
 <section id="skills">
   <div class="wrap">
     <div class="kicker rv">Toolkit</div>
-    <h2 class="rv" style="--d:.08s">Python end to end. <span class="soft">From raw CSV to a live app.</span></h2>
+    <h2 class="split">Python end to end. <span class="soft">From raw CSV to a live app.</span></h2>
     <div class="chips" id="chips">
       <span class="chip k">Python</span><span class="chip k">scikit-learn</span><span class="chip k">pandas</span><span class="chip">NumPy</span>
       <span class="chip">Random forests</span><span class="chip">Feature engineering</span><span class="chip">k-fold CV</span><span class="chip">Error analysis</span>
@@ -544,7 +597,7 @@
 <section class="alt" id="code">
   <div class="wrap">
     <div class="kicker rv">On GitHub</div>
-    <h2 class="rv" style="--d:.08s">Everything's public. <span class="soft">Flick through.</span></h2>
+    <h2 class="split">Everything's public. <span class="soft">Flick through.</span></h2>
     <div class="carousel rv" style="--d:.15s">
       <div class="clip">
         <div class="viewport" id="viewport">
@@ -561,6 +614,7 @@
 
 <!-- CONTACT -->
 <section class="contact" id="contact">
+  <div class="cbg" data-par="0.18" aria-hidden="true"><img src="https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=1600&q=70" alt="" loading="lazy" decoding="async"></div>
   <div class="wrap">
     <h2 class="rv">Let's build something <span class="grad" style="background:linear-gradient(100deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent">that works.</span></h2>
     <p class="section-lede rv" style="--d:.1s;margin-left:auto;margin-right:auto">Open to machine learning and data roles. Based in Amritsar, Punjab, India.</p>
@@ -648,15 +702,7 @@
   /* ================= Reveal + counters + charts ================= */
   function countUp(el) {
     var end = parseFloat(el.dataset.count), dec = +(el.dataset.dec || 0);
-    var pre = el.dataset.prefix || '', suf = el.dataset.suffix || '';
-    var fmt = function (v) { return pre + (dec ? v.toFixed(dec) : Math.round(v).toLocaleString('en-IN')) + suf; };
-    if (reduce) { el.textContent = fmt(end); return; }
-    var t0 = performance.now(), dur = 1600;
-    (function f(now) {
-      var p = Math.min((now - t0) / dur, 1), e = 1 - Math.pow(1 - p, 4);
-      el.textContent = fmt(end * e);
-      if (p < 1) requestAnimationFrame(f);
-    })(t0);
+    el.textContent = (el.dataset.prefix || '') + (dec ? end.toFixed(dec) : Math.round(end).toLocaleString('en-IN')) + (el.dataset.suffix || '');
   }
   var io = new IntersectionObserver(function (entries) {
     entries.forEach(function (en) {
@@ -665,7 +711,7 @@
       el.querySelectorAll && el.querySelectorAll('[data-count]').forEach(countUp);
     });
   }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
-  document.querySelectorAll('.rv, .chart, .chips, .dash').forEach(function (el) { io.observe(el); });
+  document.querySelectorAll('.rv, .chart, .chips, .dash, .split, .mosaic').forEach(function (el) { io.observe(el); });
   document.querySelectorAll('.chip').forEach(function (c, i) { c.style.setProperty('--d', (i * 0.035) + 's'); });
   // hero copy reveals immediately
   document.querySelectorAll('.hero .rv').forEach(function (el) { requestAnimationFrame(function () { el.classList.add('in'); }); });
@@ -686,13 +732,7 @@
   /* ================= Dashboard ================= */
   (function () {
     var langColor = { 'Python': '#3572A5', 'Java': '#b07219', 'Jupyter Notebook': '#DA5B0B', 'HTML': '#e34c26', 'JavaScript': '#f1e05a', 'Other': '#8e8e93' };
-    function count(el, end, suf) {
-      suf = suf || '';
-      if (reduce) { el.textContent = end + suf; return; }
-      var t0 = performance.now();
-      (function f(now) { var q = Math.min((now - t0) / 1400, 1), e = 1 - Math.pow(1 - q, 4);
-        el.textContent = Math.round(end * e) + suf; if (q < 1) requestAnimationFrame(f); })(t0);
-    }
+    function count(el, end, suf) { el.textContent = end + (suf || ''); el.classList.add('pop'); }
     var dash = document.getElementById('dash');
     function whenVisible(fn) {
       if (dash.classList.contains('in')) return fn();
@@ -869,41 +909,74 @@
     requestAnimationFrame(draw);
   })();
 
-  /* ================= Scroll story: 107.63 → 11.91 → 2.04 ================= */
+  /* ================= Split headings into masked words ================= */
+  document.querySelectorAll('.split').forEach(function (h) {
+    var i = 0;
+    (function walk(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(function (part) {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+            var o = document.createElement('span'); o.className = 'sw';
+            var w = document.createElement('span'); w.textContent = part; w.style.setProperty('--d', (i++ * 0.05) + 's');
+            o.appendChild(w); frag.appendChild(o);
+          });
+          node.replaceChild(frag, n);
+        } else if (n.nodeType === 1) walk(n);
+      });
+    })(h);
+  });
+
+  /* ================= Scroll engine: belts, big line, parallax =================
+     One rAF loop. Scroll velocity runs through a spring so the belts surge and
+     settle instead of jittering; everything is transform-only. */
   (function () {
-    var sec = document.getElementById('story'), num = document.getElementById('storyNum'),
-        bar = document.getElementById('storyBar'), drop = document.getElementById('storyDrop'),
-        steps = sec.querySelectorAll('.step');
-    var stops = [107.63, 11.91, 2.04];
-    var msgs = ['', '−89% — a real model', '−98% overall. One crop was 65.15 MAE; the rest were 0.55.'];
-    function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
-    var secTop = 0, secRange = 1;
-    function measure() { secTop = sec.offsetTop; secRange = Math.max(sec.offsetHeight - innerHeight, 1); }
-    function target() { return reduce ? 1 : Math.min(Math.max((scrollY - secTop) / secRange, 0), 1); }
-    var lastTxt = '', lastScale = -1, lastStage = -1;
-    function render(p) {
-      // three plateaus with transitions between them
-      var seg = p * 2, i = Math.min(Math.floor(seg), 1), local = seg - i;
-      local = ease(Math.min(Math.max((local - 0.2) / 0.6, 0), 1));
-      if (p >= 1) { i = 1; local = 1; }
-      var a = Math.log(stops[i]), b = Math.log(stops[i + 1]);
-      var v = Math.exp(a + (b - a) * local);
-      var txt = v.toFixed(2); if (txt !== lastTxt) { num.textContent = txt; lastTxt = txt; }
-      var sc = Math.round(v / stops[0] * 1e4) / 1e4; if (sc !== lastScale) { bar.style.transform = 'scaleX(' + sc + ')'; lastScale = sc; }
-      var stage = local > 0.5 ? i + 1 : i;
-      if (stage !== lastStage) {
-        lastStage = stage;
-        steps.forEach(function (s, k) { s.classList.toggle('on', k <= stage); });
-        drop.textContent = msgs[stage] || '\u00a0';
+    var belts = [].map.call(document.querySelectorAll('.belt'), function (b) {
+      var inner = b.querySelector('.belt-in'), n = inner.children.length;
+      inner.innerHTML += inner.innerHTML;               // duplicate for a seamless loop
+      [].slice.call(inner.children, n).forEach(function (f) { f.setAttribute('aria-hidden', 'true'); });
+      return { el: inner, dir: +b.dataset.dir, speed: +b.dataset.speed, x: 0, w: 0 };
+    });
+    var line = document.querySelector('.bigline-in');
+    var pars = [].slice.call(document.querySelectorAll('[data-par]'));
+    function measure() { belts.forEach(function (b) { b.w = b.el.scrollWidth / 2; }); }
+    addEventListener('resize', measure); addEventListener('load', measure); measure();
+
+    var vel = new Spring(0, { damping: 1, response: 0.5, eps: 0.5 });
+    var lastY = scrollY, lastT = performance.now(), reelOn = false;
+    var reel = document.getElementById('reel');
+    if (reel) new IntersectionObserver(function (en) { reelOn = en[0].isIntersecting; }, { rootMargin: '20% 0px' }).observe(reel);
+    var live = new Set();
+    var pio = new IntersectionObserver(function (en) { en.forEach(function (e) { e.isIntersecting ? live.add(e.target) : live.delete(e.target); }); }, { rootMargin: '15% 0px' });
+    pars.forEach(function (p) { pio.observe(p); });
+
+    function frame(now) {
+      var dt = Math.min((now - lastT) / 1000, 1 / 20); lastT = now;
+      var y = scrollY, raw = dt > 0 ? (y - lastY) / dt : 0; lastY = y;
+      vel.target = Math.max(Math.min(raw, 4000), -4000); vel.step(dt);
+      var v = vel.x;
+      if (reelOn && !reduce) {
+        belts.forEach(function (b) {
+          if (!b.w) return;
+          b.x += b.dir * (b.speed + Math.min(Math.abs(v) * 0.12, 240)) * dt;
+          b.x = ((b.x % b.w) + b.w) % b.w;
+          var skew = Math.max(Math.min(v * 0.004, 6), -6);
+          b.el.style.transform = 'translate3d(' + (-b.x).toFixed(2) + 'px,0,0) skewX(' + (-skew * b.dir).toFixed(2) + 'deg)';
+        });
+        if (line) {
+          var r = reel.getBoundingClientRect(), p = (innerHeight - r.top) / (innerHeight + r.height);
+          line.style.transform = 'translate3d(' + (-p * 45).toFixed(2) + '%,0,0)';
+        }
       }
+      if (!reduce) live.forEach(function (el) {
+        var r = el.getBoundingClientRect(), c = r.top + r.height / 2 - innerHeight / 2;
+        var im = el.querySelector('img'); if (im) im.style.transform = 'translate3d(0,' + (c * +el.dataset.par).toFixed(1) + 'px,0)';
+      });
+      requestAnimationFrame(frame);
     }
-    // mouse-wheel ticks jump ~100px; a critically damped spring glides between them
-    var sp = new Spring(target(), { damping: 1, response: 0.28, eps: 0.0002, onUpdate: render });
-    var near = false;
-    new IntersectionObserver(function (en) { near = en[0].isIntersecting; if (near) sp.to(target()); }, { rootMargin: '50% 0px' }).observe(sec);
-    addEventListener('scroll', function () { if (near) sp.to(target()); }, { passive: true });
-    addEventListener('resize', function () { measure(); sp.set(target()); });
-    measure(); sp.set(target());
+    requestAnimationFrame(frame);
   })();
 
   /* ================= Card tilt: springs follow the pointer ================= */
