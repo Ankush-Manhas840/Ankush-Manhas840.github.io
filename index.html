@@ -519,7 +519,7 @@
     <div class="h-desc" id="hud-desc"></div>
   </div>
 </div>
-<nav id="rail" aria-label="Section progress"></nav>
+<div id="rail" role="navigation" aria-label="Section progress"></div>
 
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
@@ -544,7 +544,7 @@
     const fmt = v => pre + (el.dataset.sep ? Math.round(v).toLocaleString('en-IN') : v.toFixed(dec)) + suf;
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = fmt(end); return; }
     const t0 = performance.now();
-    (function step(t) { const p = Math.min((t - t0) / 1400, 1); el.textContent = fmt(end * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); })(t0);
+    (function step(t) { const p = Math.max(0, Math.min((t - t0) / 1400, 1)); el.textContent = fmt(end * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); })(t0);
   }
 
   // active nav link
