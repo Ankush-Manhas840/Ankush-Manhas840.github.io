@@ -298,6 +298,24 @@
   footer { border-top: 3px solid var(--line); padding: 20px 0 36px; color: var(--muted); font-size: .8rem; font-weight: 600; }
   footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 
+  /* ---------- fluid interaction (springs, direct manipulation) ---------- */
+  a, button, .btn, .chibi, .pnl, .tile { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  #navlinks { position: relative; }
+  #navmark { position: absolute; left: 0; bottom: -10px; width: 1px; height: 3px; background: var(--accent); transform-origin: left center; pointer-events: none; opacity: 0; transition: opacity .3s ease; }
+  nav ul a.on { color: var(--accent); }
+  .chibi { will-change: transform; }
+  .stage .chibi { cursor: grab; touch-action: none; z-index: 2; }
+  .stage .chibi.held { cursor: grabbing; }
+  .stage .hint { position: absolute; left: 12px; bottom: 12px; z-index: 3; font-family: var(--comic); font-size: 1rem; letter-spacing: .06em;
+    color: var(--ink); background: var(--panel); border: 2.5px solid var(--line); padding: 2px 10px; transform: rotate(-3deg); transition: opacity .4s ease; }
+  .stage.touched .hint { opacity: 0; }
+  .pnl .chibi, .tile .chibi, .page .chibi, .contact .chibi { cursor: pointer; }
+  @media (prefers-contrast: more) {
+    :root { --muted: var(--ink); --tone: transparent; }
+    nav { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; }
+    .bubble, .pnl, .page, .tile, .btn { border-width: 4px; }
+  }
+
   /* ---------- scroll FX ---------- */
   #speed { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40; }
   .mb.moving { filter: url(#vblur); }
@@ -323,7 +341,8 @@
 <nav id="nav">
   <div class="wrap">
     <a class="brand" href="#top">ANKUSH<b>//</b>MANHAS</a>
-    <ul>
+    <ul id="navlinks">
+      <li id="navmark" aria-hidden="true"></li>
       <li><a href="#story">Story</a></li>
       <li><a href="#work">Work</a></li>
       <li class="hide-sm"><a href="#dashboard">Dashboard</a></li>
@@ -356,6 +375,7 @@
       <div class="bubble" style="--bd:.9s">Yo! I'm <em>Ankush.</em><br>I debug models.</div>
       <div class="chibi mb" data-mood="happy" data-wave="1" role="img" aria-label="Cartoon mascot of Ankush waving"></div>
       <div class="tag">Live models ×2</div>
+      <div class="hint" aria-hidden="true">drag me ↕</div>
     </div>
   </div>
 </header>
@@ -620,10 +640,11 @@
   function eyesOpen(dx, dy, star) {
     var s = '';
     [80, 120].forEach(function (x) {
-      s += '<ellipse cx="' + x + '" cy="120" rx="9" ry="13" fill="' + IRIS + '" stroke="' + INK + '" stroke-width="2.5"/>' +
+      s += '<ellipse cx="' + x + '" cy="120" rx="9" ry="13" fill="' + IRIS + '" stroke="' + INK + '" stroke-width="2.5"/><g class="look">' +
            '<ellipse cx="' + (x + dx) + '" cy="' + (122 + dy) + '" rx="4.2" ry="6.5" fill="' + INK + '"/>';
       s += star ? '<path d="M' + (x + 1) + ' 109 l2.6 7.4 7.4 2.6 -7.4 2.6 -2.6 7.4 -2.6 -7.4 -7.4 -2.6 7.4 -2.6z" fill="#fff"/>'
                 : '<circle cx="' + (x + 3.5 + dx) + '" cy="' + (114 + dy) + '" r="3.4" fill="#fff"/><circle cx="' + (x - 3 + dx) + '" cy="' + (126 + dy) + '" r="1.6" fill="#fff"/>';
+      s += '</g>';
     });
     return '<g class="blink">' + s + '</g>';
   }
@@ -646,7 +667,7 @@
     },
     shock: function () {
       var s = '';
-      [80, 120].forEach(function (x) { s += '<ellipse cx="' + x + '" cy="120" rx="10" ry="13" fill="#fff" stroke="' + INK + '" stroke-width="2.6"/><circle cx="' + x + '" cy="121" r="2.4" fill="' + INK + '"/>'; });
+      [80, 120].forEach(function (x) { s += '<ellipse cx="' + x + '" cy="120" rx="10" ry="13" fill="#fff" stroke="' + INK + '" stroke-width="2.6"/><g class="look"><circle cx="' + x + '" cy="121" r="2.4" fill="' + INK + '"/></g>'; });
       for (var i = 0; i < 6; i++) s += '<line x1="' + (70 + i * 12) + '" y1="62" x2="' + (70 + i * 12) + '" y2="' + (84 + (i % 2) * 6) + '" stroke="#6f7fc0" stroke-width="2.4"/>';
       return s + '<path d="M68 96 L90 102 M110 102 L132 96" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>' +
         '<ellipse cx="100" cy="151" rx="7" ry="9" fill="' + MOUTH + '" stroke="' + INK + '" stroke-width="2.6"/>' +
@@ -780,6 +801,132 @@
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
+  })();
+
+  /* ================= Fluid interactions =================
+     Everything here is a spring re-targeted from its live value, so any
+     motion can be grabbed, interrupted or reversed mid-flight. */
+  var fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  function leashBand(o, dim) { var c = .55; return (o * dim * c) / (dim + c * Math.abs(o)); }
+  // 1:1 inside a free radius, progressive resistance only past it
+  function leashed(o, free, dim) { var a = Math.abs(o); return a <= free ? o : Math.sign(o) * (free + leashBand(a - free, dim)); }
+
+  // One state per mascot: translate x/y + rotation (hero drag), scale (press), eye look x/y.
+  var mascots = [].map.call(document.querySelectorAll('.chibi'), function (el) {
+    var m = { el: el, mood: el.dataset.mood, x: 0, y: 0, r: 0, s: 1, lx: 0, ly: 0, timer: 0 };
+    function apply() {
+      el.style.transform = (m.x || m.y || m.r)
+        ? 'translate3d(' + m.x.toFixed(2) + 'px,' + m.y.toFixed(2) + 'px,0) rotate(' + m.r.toFixed(2) + 'deg) scale(' + m.s.toFixed(4) + ')'
+        : (m.s !== 1 ? 'scale(' + m.s.toFixed(4) + ')' : '');
+    }
+    function look() { el.querySelectorAll('.look').forEach(function (g) { g.setAttribute('transform', 'translate(' + m.lx.toFixed(2) + ' ' + m.ly.toFixed(2) + ')'); }); }
+    m.sx = new Spring(0, { damping: .7, response: .45, onUpdate: function (v) { m.x = v; apply(); } });
+    m.sy = new Spring(0, { damping: .7, response: .45, onUpdate: function (v) { m.y = v; apply(); } });
+    m.sr = new Spring(0, { damping: .8, response: .4, onUpdate: function (v) { m.r = v; apply(); } });
+    m.ss = new Spring(1, { damping: 1, response: .15, eps: .001, onUpdate: function (v) { m.s = v; apply(); } });
+    m.slx = new Spring(0, { damping: 1, response: .3, onUpdate: function (v) { m.lx = v; look(); } });
+    m.sly = new Spring(0, { damping: 1, response: .3, onUpdate: function (v) { m.ly = v; look(); } });
+    m.setMood = function (mood) { el.innerHTML = chibi(mood, el.dataset.wave); look(); };
+    return m;
+  });
+
+  // Eyes follow the pointer with separate X and Y springs; only on-screen mascots do the work.
+  var seen = new Set();
+  var mio = new IntersectionObserver(function (en) {
+    en.forEach(function (e) { var m = mascots.filter(function (q) { return q.el === e.target; })[0]; if (m) { if (e.isIntersecting) seen.add(m); else seen.delete(m); } });
+  });
+  mascots.forEach(function (m) { mio.observe(m.el); });
+  if (fine && !reduce) addEventListener('pointermove', function (e) {
+    seen.forEach(function (m) {
+      var r = m.el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height * .48;
+      var dx = e.clientX - cx, dy = e.clientY - cy, d = Math.hypot(dx, dy) || 1, k = Math.min(d / 240, 1) * 3.6;
+      m.slx.to(dx / d * k); m.sly.to(dy / d * k * .8);
+    });
+  }, { passive: true });
+
+  // Press: instant squash on pointer-down; release springs back and the mascot reacts.
+  mascots.forEach(function (m) {
+    if (m.el.closest('.stage')) return;
+    function up() { m.ss.to(1, { damping: .55 }); }
+    m.el.addEventListener('pointerdown', function () { m.ss.to(.9, { damping: 1 }); });
+    m.el.addEventListener('pointerup', function () {
+      up(); clearTimeout(m.timer); m.setMood('excited');
+      m.timer = setTimeout(function () { m.setMood(m.mood); }, 1200);
+    });
+    m.el.addEventListener('pointerleave', up); m.el.addEventListener('pointercancel', up);
+  });
+
+  // Hero mascot: 1:1 drag from the grab point, rubber-banded leash, lean from velocity,
+  // and on release the finger's velocity is handed to the springs that carry him home.
+  (function () {
+    var stage = document.querySelector('.stage'); if (!stage) return;
+    var m = mascots.filter(function (q) { return stage.contains(q.el); })[0]; if (!m) return;
+    var bubble = stage.querySelector('.bubble'), idleText = bubble.innerHTML, drag = null, back = 0;
+    function leash() { return Math.max(stage.clientWidth * .9, 220); }
+    m.el.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      m.el.setPointerCapture(e.pointerId); m.el.classList.add('held'); stage.classList.add('touched');
+      [m.sx, m.sy, m.sr].forEach(function (sp) { springs.delete(sp); sp.target = sp.x; sp.v = 0; });  // grab from the live value
+      drag = { id: e.pointerId, ox: e.clientX - m.x, oy: e.clientY - m.y, hist: [{ x: e.clientX, y: e.clientY, t: e.timeStamp }] };
+      m.ss.to(.94, { damping: 1 });
+      clearTimeout(back); m.setMood('shock'); bubble.innerHTML = 'Whoa— <em>put me down!</em>';
+    });
+    m.el.addEventListener('pointermove', function (e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var L = leash(), F = stage.clientWidth * .35;
+      m.sx.set(leashed(e.clientX - drag.ox, F, L)); m.sy.set(leashed(e.clientY - drag.oy, F, L));
+      drag.hist.push({ x: e.clientX, y: e.clientY, t: e.timeStamp }); if (drag.hist.length > 6) drag.hist.shift();
+      var a = drag.hist[0], b = drag.hist[drag.hist.length - 1], dt = (b.t - a.t) || 16;
+      m.sr.to(Math.max(Math.min((b.x - a.x) / dt * 12, 22), -22));
+    });
+    function release(e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var h = drag.hist, a = h[0], b = h[h.length - 1], dt = (b.t - a.t) || 16, vx = 0, vy = 0;
+      if (e.timeStamp - b.t < 80) { vx = (b.x - a.x) / dt * 1000; vy = (b.y - a.y) / dt * 1000; }
+      drag = null; m.el.classList.remove('held');
+      var flung = Math.hypot(vx, vy) > 500;
+      m.sx.to(0, { velocity: vx, damping: flung ? .6 : .8 }); m.sy.to(0, { velocity: vy, damping: flung ? .6 : .8 });
+      m.sr.to(0, { velocity: vx * .02 }); m.ss.to(1, { damping: .6 });
+      m.setMood('excited'); bubble.innerHTML = flung ? 'Wheee! <em>Again?</em>' : 'Phew. <em>Thanks.</em>';
+      back = setTimeout(function () { m.setMood(m.mood); bubble.innerHTML = idleText; }, 1800);
+    }
+    m.el.addEventListener('pointerup', release); m.el.addEventListener('pointercancel', release);
+  })();
+
+  // Panels lean toward the pointer once they've landed (fine pointers only).
+  if (fine && !reduce) document.querySelectorAll('.pnl, .tiles .tile').forEach(function (p) {
+    var rx = 0, ry = 0, ready = false;
+    function apply() { p.style.transform = 'perspective(900px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)'; }
+    var sX = new Spring(0, { damping: 1, response: .4, onUpdate: function (v) { rx = v; apply(); } });
+    var sY = new Spring(0, { damping: 1, response: .4, onUpdate: function (v) { ry = v; apply(); } });
+    p.addEventListener('transitionend', function (e) { if (e.target === p && e.propertyName === 'transform' && p.classList.contains('in')) { ready = true; p.style.transition = 'none'; } });
+    p.addEventListener('pointermove', function (e) {
+      if (!ready) return; var r = p.getBoundingClientRect();
+      sX.to(((e.clientY - r.top) / r.height - .5) * -5); sY.to(((e.clientX - r.left) / r.width - .5) * 6);
+    });
+    p.addEventListener('pointerleave', function () { if (ready) { sX.to(0); sY.to(0); } });
+  });
+
+  // Wayfinding: a marker glides to the chapter you're reading.
+  (function () {
+    var mark = document.getElementById('navmark'), ul = document.getElementById('navlinks'), links = {};
+    ul.querySelectorAll('a[href^="#"]').forEach(function (a) { links[a.getAttribute('href').slice(1)] = a; });
+    var map = { story: 'story', work: 'work', method: 'work', skills: 'work', dashboard: 'dashboard', code: 'code', contact: 'contact' };
+    var mx = 0, mw = 1, cur = null;
+    function apply() { mark.style.transform = 'translateX(' + mx.toFixed(1) + 'px) scaleX(' + mw.toFixed(1) + ')'; }
+    var sX = new Spring(0, { damping: 1, response: .35, onUpdate: function (v) { mx = v; apply(); } });
+    var sW = new Spring(1, { damping: 1, response: .35, onUpdate: function (v) { mw = v; apply(); } });
+    function go(id) {
+      var a = links[map[id]];
+      Object.keys(links).forEach(function (k) { links[k].classList.toggle('on', links[k] === a); });
+      if (!a || !a.offsetParent) { mark.style.opacity = 0; cur = null; return; }
+      var x = a.offsetLeft, w = a.offsetWidth;
+      if (cur === null) { sX.set(x); sW.set(w); } else { sX.to(x); sW.to(w); }
+      cur = id; mark.style.opacity = 1;
+    }
+    var nio = new IntersectionObserver(function (en) { en.forEach(function (e) { if (e.isIntersecting) go(e.target.id); }); }, { rootMargin: '-45% 0px -50% 0px' });
+    ['top', 'story', 'work', 'method', 'skills', 'dashboard', 'code', 'contact'].forEach(function (id) { var el = document.getElementById(id); if (el) nio.observe(el); });
+    addEventListener('resize', function () { if (cur) { var c = cur; cur = null; go(c); } });
   })();
 
   /* ================= Shared GitHub data ================= */
