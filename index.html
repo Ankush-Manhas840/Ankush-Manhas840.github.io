@@ -363,28 +363,19 @@
   .dim .ghost { line-height: .84; letter-spacing: -.005em; font-weight: 400; }
   .dim .ghost span + span { margin-top: -.06em; }
 
-  /* claw marks raked across the hero, like the poster's slashes */
-  .hero::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .5;
-    background: linear-gradient(115deg, transparent 47.6%, rgba(226,35,46,.55) 48%, transparent 48.5%) 30% 0 / 100% 100% no-repeat,
-                linear-gradient(115deg, transparent 51.6%, rgba(226,35,46,.4) 52%, transparent 52.4%) 30% 0 / 100% 100% no-repeat,
-                linear-gradient(115deg, transparent 55.6%, rgba(226,35,46,.3) 56%, transparent 56.3%) 30% 0 / 100% 100% no-repeat; }
 
-  /* ---------- the opening: three claws, a flash, the screen splits ---------- */
+
+  /* ---------- the opening: a flash, then the screen splits ---------- */
   #intro { position: fixed; inset: 0; z-index: 300; pointer-events: none; }
   #intro .half { position: absolute; inset: 0; background: #0d0d0f; }
   #intro .half.a { clip-path: polygon(0 0, 49% 0, 85% 100%, 0 100%); }
   #intro .half.b { clip-path: polygon(49% 0, 100% 0, 100% 100%, 85% 100%); }
-  #intro svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  #intro path { fill: none; stroke: #ff2a35; stroke-width: 1.1; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-width: 7px; filter: drop-shadow(0 0 10px #ff2a35) drop-shadow(0 0 30px rgba(255,42,53,.7)); stroke-dasharray: 1; stroke-dashoffset: 1; }
   #intro .i-word { position: absolute; left: 50%; top: 50%; translate: -50% -50%; font-family: "Noto Sans SC", var(--jp); font-weight: 900; font-size: min(46vw, 46vh); color: transparent; -webkit-text-stroke: 2px rgba(226,35,46,.5); opacity: 0; }
   #intro.done { display: none; }
   .hero.shake { animation: shake .42s cubic-bezier(.36,.07,.19,.97); }
   @keyframes shake { 10%,90% { transform: translate(-2px,1px); } 20%,80% { transform: translate(5px,-3px); } 30%,50%,70% { transform: translate(-8px,3px); } 40%,60% { transform: translate(8px,-2px); } }
   .flash { position: fixed; inset: 0; z-index: 299; pointer-events: none; background: radial-gradient(circle at 50% 50%, rgba(255,60,70,.55), rgba(226,35,46,.15) 60%, transparent); }
 
-  /* ---------- a click leaves claw marks ---------- */
-  .claw { position: fixed; z-index: 250; pointer-events: none; width: 120px; height: 120px; translate: -50% -50%; }
-  .claw path { fill: none; stroke: #ff2a35; stroke-width: 4; stroke-linecap: round; filter: drop-shadow(0 0 6px #ff2a35); stroke-dasharray: 1; }
 
   .btn.fill { clip-path: polygon(0 0, 100% 0, 100% 70%, calc(100% - 12px) 100%, 0 100%); }
 
@@ -479,7 +470,7 @@
 <body>
 <div id="intro" aria-hidden="true">
   <div class="half a"></div><div class="half b"></div>
-  <svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M18 -4 L64 104"/><path d="M33 -4 L79 104"/><path d="M48 -4 L94 104"/></svg>
+  
   <div class="i-word">狼</div>
 </div>
 
@@ -1093,14 +1084,13 @@
 
   })();
 
-  /* ================= WARWICK: the opening hit + claw clicks ================= */
+
+  /* ================= WARWICK: the opening hit ================= */
   (() => {
-    const intro = document.getElementById('intro');
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { intro.classList.add('done'); return; }
-    const paths = [...intro.querySelectorAll('path')], word = intro.querySelector('.i-word');
-    paths.forEach(p => p.setAttribute('pathLength', 1));
-    // three claws, raked one after another
-    paths.forEach((p, i) => p.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 170, delay: 140 + i * 70, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' }));
+    const intro = document.getElementById('intro'), still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (still) { intro.classList.add('done'); return; }
+    const word = intro.querySelector('.i-word');
+
     word.animate([{ opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1, offset: .4 }, { opacity: 0, scale: .96 }], { duration: 700, easing: 'ease-out', fill: 'forwards' });
     const skip = () => { intro.getAnimations({ subtree: true }).forEach(a => a.finish()); intro.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: 'ease-out' }).onfinish = () => intro.classList.add('done'); clearTimeout(hit); };
     ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, function once() { if (!intro.classList.contains('done')) skip(); removeEventListener(ev, once); }, { passive: true }));
@@ -1112,26 +1102,10 @@
       const e = 'cubic-bezier(.75,0,.2,1)';
       intro.querySelector('.a').animate([{ transform: 'none' }, { transform: 'translate(-60vw,-30vh) rotate(-6deg)' }], { duration: 650, easing: e, fill: 'forwards' });
       intro.querySelector('.b').animate([{ transform: 'none' }, { transform: 'translate(60vw,30vh) rotate(6deg)' }], { duration: 650, easing: e, fill: 'forwards' });
-      intro.querySelector('svg').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, delay: 120, fill: 'forwards' });
+      
       setTimeout(() => intro.classList.add('done'), 700);
     }, 520);
 
-    // every click rakes three claws where you clicked
-    const NS = 'http://www.w3.org/2000/svg';
-    let lastClaw = 0;
-    addEventListener('pointerdown', e => {
-      if (e.target.closest('#hud') || performance.now() - lastClaw < 90) return;
-      lastClaw = performance.now();
-      const svg = document.createElementNS(NS, 'svg'); svg.classList.add('claw'); svg.setAttribute('viewBox', '0 0 120 120');
-      svg.style.left = e.clientX + 'px'; svg.style.top = e.clientY + 'px'; svg.style.rotate = (Math.random() * 40 - 20) + 'deg';
-      [[30, 14, 52, 106], [52, 8, 74, 112], [74, 14, 96, 104]].forEach(([x1, y1, x2, y2], i) => {
-        const p = document.createElementNS(NS, 'path'); p.setAttribute('d', `M${x1} ${y1} Q${(x1 + x2) / 2 + 6} ${(y1 + y2) / 2} ${x2} ${y2}`); p.setAttribute('pathLength', 1);
-        svg.append(p);
-        p.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 120, delay: i * 30, easing: 'ease-out', fill: 'backwards' });
-      });
-      document.body.append(svg);
-      svg.animate([{ opacity: 1 }, { opacity: 1, offset: .5 }, { opacity: 0 }], { duration: 700, easing: 'ease-in' }).onfinish = () => svg.remove();
-    });
   })();
 
   /* ================= charts: drawn from the real numbers, animate in when scrolled to ================= */
