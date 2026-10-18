@@ -361,7 +361,7 @@ function setMode(m){mode=m;
     ?'<b>Random split:</b> training and test rows are shuffled together, so the model learns from purchases that happen <b>after</b> the ones it is tested on. The score looks great and means nothing.'
     :'<b>Time split:</b> the model trains only on the past (blue) and is tested on the future (amber), the way it would really be used. This is how my fraud project is evaluated.';
 }
-bR.onclick=()=>setMode('rand');bT.onclick=()=>setMode('time');setMode('time');
+bR.onclick=()=>{setMode('rand');leakShown=32};bT.onclick=()=>{setMode('time');leakShown=0};setMode('time');
 cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();mouseX=e.clientX-r.left});
 cv.addEventListener('pointerleave',()=>mouseX=null);
 const rN=document.getElementById('rN'),rF=document.getElementById('rF'),rL=document.getElementById('rL');
@@ -407,7 +407,8 @@ function frame(){
   }
   if(mouseX!==null){cx.strokeStyle='rgba(232,237,243,.18)';cx.beginPath();cx.moveTo(mouseX,0);cx.lineTo(mouseX,H-22);cx.stroke()}
   const leak=trainCount?futureInTrain/trainCount*100:0;
-  leakShown+=(leak-leakShown)*.08;
+  const now=performance.now(),dt=Math.min((now-(frame.last||now))/1000,1);frame.last=now;
+  leakShown+=(leak-leakShown)*(1-Math.exp(-dt*6));
   rN.textContent=total.toLocaleString('en-IN');rF.textContent=frauds;rL.textContent=Math.round(leakShown)+'%';
   requestAnimationFrame(frame);
 }
