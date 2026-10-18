@@ -352,7 +352,7 @@ function spawn(){
   pts.push({x:W+4,y:H*(.15+.7*Math.random()),r:fraud?3.6:2.2,fraud,rand:Math.random(),flag:0,born:t});
   total+=Math.floor(800+Math.random()*900);if(fraud)frauds++;
 }
-const note=document.getElementById('note'),leakBox=document.getElementById('leakBox');
+const rL=document.getElementById('rL'),note=document.getElementById('note'),leakBox=document.getElementById('leakBox');
 const bR=document.getElementById('bRand'),bT=document.getElementById('bTime');
 function setMode(m){mode=m;
   bR.className=m==='rand'?'on bad':'';bT.className=m==='time'?'on good':'';
@@ -361,10 +361,10 @@ function setMode(m){mode=m;
     ?'<b>Random split:</b> training and test rows are shuffled together, so the model learns from purchases that happen <b>after</b> the ones it is tested on. The score looks great and means nothing.'
     :'<b>Time split:</b> the model trains only on the past (blue) and is tested on the future (amber), the way it would really be used. This is how my fraud project is evaluated.';
 }
-bR.onclick=()=>{setMode('rand');leakShown=32};bT.onclick=()=>{setMode('time');leakShown=0};setMode('time');
+bR.onclick=()=>{setMode('rand');leakShown=32;rL.textContent='32%'};bT.onclick=()=>{setMode('time');leakShown=0;rL.textContent='0%'};setMode('time');
 cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();mouseX=e.clientX-r.left});
 cv.addEventListener('pointerleave',()=>mouseX=null);
-const rN=document.getElementById('rN'),rF=document.getElementById('rF'),rL=document.getElementById('rL');
+const rN=document.getElementById('rN'),rF=document.getElementById('rF');
 let leakShown=0;
 function frame(){
   t++;
