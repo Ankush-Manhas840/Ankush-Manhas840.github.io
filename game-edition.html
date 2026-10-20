@@ -620,8 +620,8 @@
     </div>
     <div class="stats">
       <div><b data-count="24.4" data-dec="1" data-suffix="M">0</b><small>transactions in the dataset</small></div>
-      <div><b data-count="150" data-suffix="×">0</b><small>better than random at top 1,000</small></div>
-      <div><b data-count="142">0</b><small>frauds caught on 253 unseen people</small></div>
+      <div><b data-count="177" data-suffix="×">0</b><small>better than random at top 1,000</small></div>
+      <div><b data-count="177">0</b><small>frauds caught on 253 unseen people</small></div>
       <div><b data-count="45" data-suffix="×">0</b><small>riskier when the card is used abroad</small></div>
     </div>
     <div class="m-body">
@@ -647,7 +647,7 @@
       <div>
         <div class="finding"><h4>Threw out the first dataset</h4><p>EDA on PaySim showed senders almost never repeat and the balance columns leak the label. A per-card real-time system needs history, so I moved to IBM TabFormer.</p></div>
         <div class="finding"><h4>A strong feature made it worse</h4><p>Adding card-use type cut frauds in the top 1,000 alerts from 150 to 17. Online fraud fell from 66 to 0 per 10,000 after 2017 — drift, confirmed on a second group of people. The feature stays out.</p></div>
-        <div class="finding"><h4>Tested on people it never saw</h4><p>Scored 253 new people in a later period without retraining: 142 frauds in the top 1,000 alerts against about 1 for random guessing. PR-AUC 0.074 against 0.090 on its own people.</p></div>
+        <div class="finding"><h4>Tested on people it never saw</h4><p>Scored 253 new people in a later period without retraining. Per-card history features ("is this the card's usual hour?") lifted it from 142 to 177 frauds in the top 1,000 alerts, against about 1 for random guessing and 135 for XGBoost.</p></div>
         <div class="finding next"><h4>Next up</h4><p>XGBoost on the same five features, then the training script, MLflow tracking and the streaming pipeline.</p></div>
       </div>
     </div>
@@ -704,7 +704,7 @@
       <div class="plot"></div>
     </figure>
     <figure class="chart reveal" id="ch-top">
-      <figcaption><span class="lbl">Fraud model · top 1,000 alerts</span><b>150 vs 1</b><small>Real frauds found in the 1,000 highest-scored purchases.</small></figcaption>
+      <figcaption><span class="lbl">Fraud model · top 1,000 alerts</span><b>177 vs 1</b><small>Real frauds found in the 1,000 highest-scored purchases, on people the model never saw.</small></figcaption>
       <div class="plot"></div>
     </figure>
   </div>
@@ -1196,9 +1196,9 @@
 
     // 6. top 1,000 alerts: model vs random, as columns
     {
-      const cols = [['Random', 1, '#5a1a1f'], ['Model · own people', 150, R], ['Model · new people', 142, '#ff4b53']];
-      const W = 240, H = 170, base = 140, bw = 46, sc = 110 / 150;
-      put('ch-top', `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="150 frauds in top 1000 against about 1 for random">
+      const cols = [['Random', 1, '#5a1a1f'], ['First model', 142, R], ['Final model', 177, '#ff4b53']];
+      const W = 240, H = 170, base = 140, bw = 46, sc = 110 / 177;
+      put('ch-top', `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="177 frauds in top 1000 against about 1 for random">
         <line x1="10" x2="${W - 10}" y1="${base}" y2="${base}" stroke="rgba(226,35,46,.3)"/>
         ${cols.map(([n, v, c], i) => { const x = 22 + i * 74, h = Math.max(2, v * sc);
           return `<g class="bar"><rect class="growy" style="transition-delay:${i * .15}s" x="${x}" y="${base - h}" width="${bw}" height="${h}" fill="${c}"/>

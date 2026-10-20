@@ -202,22 +202,24 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:22px
       <div>
         <h3>Real-Time Fraud Detection</h3>
         <p class="d">24.4 million card transactions from 2,000 people, about 12 frauds in every 10,000 (IBM TabFormer). The hard part is not the model. It is keeping the future out of the training data.</p>
-        <div class="tags"><span>python</span><span>pandas</span><span>scikit-learn</span><span>xgboost</span><span>parquet</span></div>
+        <div class="tags"><span>python</span><span>pandas</span><span>scikit-learn</span><span>xgboost</span><span>fastapi</span><span>pydantic</span><span>pytest</span></div>
         <ul class="log">
           <li class="x"><b>Threw out the first dataset</b>PaySim's balance columns were never updated for fraud rows, so they gave the answer away.</li>
           <li class="y"><b>Split by time, not at random</b>Training ends April 2017. The model is always judged on the future.</li>
           <li class="x"><b>A strong feature made it worse</b>Online fraud fell from 66 to 0 per 10,000 after 2017. Drift, confirmed on a second group. Feature removed.</li>
-          <li class="y"><b>Held up on 253 unseen people</b>142 frauds in the top 1,000 alerts, against 150 on its own people.</li>
-          <li class="z"><b>Next</b>XGBoost, then experiment tracking and a FastAPI scoring service.</li>
+          <li class="y"><b>Features beat complexity</b>Per-card history ("is this the card's usual hour?") lifted unseen-people alerts from 142 to 177 frauds. XGBoost reached 135, so the simple model stayed.</li>
+          <li class="y"><b>Served as an API</b>FastAPI /predict with Pydantic validation and pytest checks, flagging about 1,000 alerts per 600,000 purchases.</li>
+          <li class="z"><b>Next</b>Streaming with Kafka and Redis, then monitoring and a live dashboard.</li>
         </ul>
       </div>
       <div>
         <div class="chart">
           <div class="k">real frauds in the top 1,000 alerts</div>
-          <div class="big-n" style="margin-bottom:14px"><span data-count="142">0</span> <small>vs about 1 for random guessing</small></div>
-          <div class="bar"><span class="l">random</span><span class="t"><span class="f" data-w="0.7"></span></span><span class="v">~1</span></div>
-          <div class="bar"><span class="l">same people</span><span class="t"><span class="f b" data-w="100"></span></span><span class="v">150</span></div>
-          <div class="bar"><span class="l">253 unseen</span><span class="t"><span class="f g" data-w="94.7"></span></span><span class="v">142</span></div>
+          <div class="big-n" style="margin-bottom:14px"><span data-count="177">0</span> <small>on 253 unseen people, vs about 1 for random</small></div>
+          <div class="bar"><span class="l">random</span><span class="t"><span class="f" data-w="0.6"></span></span><span class="v">~1</span></div>
+          <div class="bar"><span class="l">xgboost</span><span class="t"><span class="f b" data-w="76.3"></span></span><span class="v">135</span></div>
+          <div class="bar"><span class="l">first model</span><span class="t"><span class="f b" data-w="80.2"></span></span><span class="v">142</span></div>
+          <div class="bar"><span class="l">final model</span><span class="t"><span class="f g" data-w="100"></span></span><span class="v">177</span></div>
         </div>
         <div class="chart">
           <div class="k">drift caught · online fraud per 10,000</div>
@@ -226,7 +228,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:22px
         </div>
         <div class="chart">
           <div class="k">build progress</div>
-          <div class="pipe"><span class="done">data + EDA ✓</span><span class="now">models</span><span>kafka</span><span>redis</span><span>fastapi</span><span>monitoring</span></div>
+          <div class="pipe"><span class="done">data + EDA ✓</span><span class="done">models ✓</span><span class="done">fastapi ✓</span><span class="now">kafka</span><span>redis</span><span>monitoring</span></div>
         </div>
         <div class="links">
           <a class="btn main" href="https://github.com/Ankush-Manhas840/fraud-detection-realtime" target="_blank" rel="noopener">Code and write-up</a>
