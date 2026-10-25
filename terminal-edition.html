@@ -153,8 +153,22 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:22px
 .rv.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.caret,.pipe .now{animation:none}.bar .f{transition:none}}
 </style>
+<style id="edition-bar-style">
+.ed-bar { position: fixed; top: 0; left: 0; right: 0; height: 34px; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: #0a080c; border-bottom: 2px solid #e8487f; font: 600 12px/1 "Space Grotesk", system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase;
+  overflow-x: auto; white-space: nowrap; padding: 0 10px; }
+.ed-bar span { color: #8e8496; margin-right: 4px; }
+.ed-bar a { color: #f6eedb; text-decoration: none; padding: 5px 10px; border: 1px solid transparent; }
+.ed-bar a:hover { border-color: #f6eedb; }
+.ed-bar a.on { background: #f8d23c; color: #151116; border-color: #151116; }
+.ed-bar a small { font-size: 10px; opacity: .7; margin-left: 4px; text-transform: none; }
+body { padding-top: 34px !important; }
+nav { top: 34px !important; }
+@media (prefers-reduced-motion: no-preference) { .ed-bar a { transition: background .15s ease-out; } }
+</style>
 </head>
 <body>
+<div class="ed-bar" role="navigation" aria-label="Portfolio themes"><span>Theme</span><a href="index.html">Kaiju<small>(main)</small></a><a href="terminal-edition.html" class="on" aria-current="page">Terminal</a><a href="game-edition.html">Game</a><a href="clean-edition.html">Clean</a></div>
 
 <nav><div class="wrap">
   <span class="prompt"><b>ankush@ml</b>:<i>~/portfolio</i>$<span class="caret"></span></span>
