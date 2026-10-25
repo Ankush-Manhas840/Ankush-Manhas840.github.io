@@ -5,6 +5,7 @@ from playwright.sync_api import sync_playwright
 APPS = [
     "https://usedcarchecker.streamlit.app/",
     "https://crop-yield-prediction-wpnuufdz2fc9tmbm4k8t3y.streamlit.app/",
+    "https://fraud-check.streamlit.app/",
 ]
 
 failed = []
