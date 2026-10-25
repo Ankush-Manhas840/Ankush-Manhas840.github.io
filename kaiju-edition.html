@@ -57,32 +57,27 @@ a { color: inherit; }
 .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
 .dela { font-family: "Dela Gothic One", sans-serif; font-weight: 400; }
 
-/* ---------- opening animation ---------- */
-.intro { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; overflow: hidden; cursor: pointer; }
-.intro .half { position: absolute; left: -10%; right: -10%; height: 60%; background: #151116;
-  background-image: radial-gradient(rgba(232,72,127,.35) 1.5px, transparent 1.8px); background-size: 10px 10px;
-  transition: transform .7s cubic-bezier(.7,0,.2,1); }
-.intro .half.top { top: -5%; transform-origin: top; clip-path: polygon(0 0,100% 0,100% 82%,0 100%); }
-.intro .half.bottom { bottom: -5%; clip-path: polygon(0 18%,100% 0,100% 100%,0 100%); }
-.intro .stage { position: relative; z-index: 2; text-align: center; color: #f6eedb; transition: opacity .25s ease; }
-.intro .siren { font-family: "Dela Gothic One"; font-size: clamp(64px, 16vw, 190px); line-height: 1; color: #e2383c;
-  -webkit-text-stroke: 3px #f6eedb; paint-order: stroke fill; transform: scale(2.4) rotate(-6deg); opacity: 0; }
-.intro .msg { font-family: "Dela Gothic One"; font-size: clamp(16px, 3vw, 32px); margin-top: 8px; letter-spacing: .06em; opacity: 0; transform: translateY(16px); }
+/* ---------- opening animation: visible from the first paint, driven by the Web Animations API ---------- */
+.intro { position: fixed; inset: 0; z-index: 300; overflow: hidden; }
+.intro .half { position: absolute; inset: -2%; background: #151116;
+  background-image: radial-gradient(rgba(232,72,127,.35) 1.5px, transparent 1.8px); background-size: 10px 10px; }
+.intro .half.a { clip-path: polygon(0 0, 100% 0, 100% 38%, 0 62%); }
+.intro .half.b { clip-path: polygon(0 62%, 100% 38%, 100% 100%, 0 100%); }
+.intro .stage { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; color: #f6eedb; z-index: 2; }
+.intro .siren { font-family: "Dela Gothic One", sans-serif; font-size: clamp(64px, 16vw, 190px); line-height: 1; color: #e2383c;
+  -webkit-text-stroke: 3px #f6eedb; paint-order: stroke fill; opacity: 0; transform-origin: 50% 50%; justify-self: center; }
+.intro .msg { font-family: "Dela Gothic One", sans-serif; font-size: clamp(15px, 2.8vw, 30px); margin-top: 10px; letter-spacing: .06em; opacity: 0; }
 .intro .msg b { color: #f8d23c; }
 .intro .skip { position: absolute; z-index: 3; bottom: 22px; left: 0; right: 0; text-align: center; font-size: 13px; color: #b9adc2; letter-spacing: .1em; text-transform: uppercase; }
-.intro .zap { position: absolute; z-index: 1; left: -20%; right: -20%; top: 50%; height: 14px; background: #56cdee;
-  box-shadow: 0 0 0 4px #151116, 0 0 40px 10px rgba(86,205,238,.6); transform: rotate(-12deg) scaleX(0); transform-origin: left; }
-.intro.play .siren { animation: stamp .45s cubic-bezier(.2,1.4,.4,1) .15s forwards; }
-.intro.play .msg { animation: rise .4s ease-out .6s forwards; }
-.intro.play .zap { animation: zapx .35s ease-in 1.15s forwards; }
-.intro.open .stage, .intro.open .zap, .intro.open .skip { opacity: 0; }
-.intro.open .half.top { transform: translateY(-105%) rotate(-3deg); }
-.intro.open .half.bottom { transform: translateY(105%) rotate(-3deg); }
-.intro.gone { display: none; }
-@keyframes stamp { to { transform: scale(1) rotate(-6deg); opacity: 1; } }
-@keyframes rise { to { transform: none; opacity: 1; } }
-@keyframes zapx { to { transform: rotate(-12deg) scaleX(1); } }
+.intro .zap { position: absolute; z-index: 1; left: -10%; width: 120%; top: 50%; height: 16px; margin-top: -8px; background: #56cdee;
+  box-shadow: 0 0 0 5px #151116, 0 0 50px 14px rgba(86,205,238,.7); transform-origin: left center; transform: scaleX(0); }
+.intro .zap::after { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 4px; background: #eafcff; }
+.intro.done { display: none; }
+.flash { position: fixed; inset: 0; z-index: 301; background: #fff6d8; pointer-events: none; }
+.shake { animation: shake .45s linear; }
+@keyframes shake { 0%,100% { translate: 0 0; } 15% { translate: -10px 6px; } 30% { translate: 9px -7px; } 45% { translate: -7px -5px; } 60% { translate: 6px 6px; } 75% { translate: -4px 3px; } }
 body.locked { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .intro, .flash { display: none !important; } .shake { animation: none; } }
 
 /* ---------- nav ---------- */
 nav { position: sticky; top: 0; z-index: 20; background: #151116; color: #f6eedb; border-bottom: 4px solid var(--flame); }
@@ -249,15 +244,16 @@ nav { top: 34px !important; }
 <body>
 <div class="ed-bar" role="navigation" aria-label="Portfolio themes"><span>Theme</span><a href="index.html">Terminal<small>(main)</small></a><a href="kaiju-edition.html" class="on" aria-current="page">Kaiju</a><a href="game-edition.html">Game</a><a href="clean-edition.html">Clean</a></div>
 
-<div class="intro gone" id="intro" aria-hidden="true">
-  <div class="half top"></div><div class="half bottom"></div>
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="half a"></div><div class="half b"></div>
   <div class="zap"></div>
   <div class="stage">
     <div class="siren">警報!</div>
     <div class="msg">FRAUD KAIJU DETECTED · <b>DEPLOYING MODEL</b></div>
   </div>
-  <div class="skip">click to skip</div>
+  <div class="skip">click or press any key to skip</div>
 </div>
+<script>document.body.classList.add("locked");</script>
 
 <nav><div class="wrap">
   <a class="logo" href="#top">ANKUSH<span>.</span>ML</a>
@@ -671,29 +667,53 @@ function startPage() {
   document.querySelectorAll(".rv").forEach((n) => io.observe(n));
 }
 
-/* ---- opening animation: once per visit, skippable, off for reduced motion ---- */
-const intro = document.getElementById("intro");
-let seen = false;
-try { seen = sessionStorage.getItem("introSeen") === "1"; } catch (e) {}
-if (reduce || seen) {
-  startPage();
-} else {
-  intro.classList.remove("gone");
-  document.body.classList.add("locked");
-  requestAnimationFrame(() => intro.classList.add("play"));
+/* ---- opening animation: every visit, skippable, off for reduced motion ---- */
+(async () => {
+  const intro = document.getElementById("intro");
+  const unlock = () => document.body.classList.remove("locked");
+  if (reduce) { intro.classList.add("done"); unlock(); startPage(); return; }
+
+  // wait (briefly) for the display font, so 警報! never flashes in a fallback font
+  await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 600))]);
+
+  const siren = intro.querySelector(".siren"), msg = intro.querySelector(".msg"), zap = intro.querySelector(".zap");
+  const a = intro.querySelector(".half.a"), b = intro.querySelector(".half.b"), stage = intro.querySelector(".stage");
+  // the beam follows the split line: from 62% down on the left to 38% down on the right
+  const angle = Math.atan2(-0.24 * innerHeight, innerWidth) * 180 / Math.PI;
+  zap.style.rotate = angle + "deg";
+  zap.style.transformOrigin = "left center";
+
+  siren.animate([{ opacity: 0, transform: "scale(2.6) rotate(-14deg)" }, { opacity: 1, transform: "scale(1) rotate(-6deg)" }],
+    { duration: 420, easing: "cubic-bezier(.2,1.5,.4,1)", fill: "forwards" });
+  msg.animate([{ opacity: 0, transform: "translateY(16px)" }, { opacity: 1, transform: "none" }],
+    { duration: 320, delay: 380, easing: "ease-out", fill: "forwards" });
+  zap.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }],
+    { duration: 240, delay: 900, easing: "cubic-bezier(.6,0,.9,.4)", fill: "forwards" });
+
   let finished = false;
-  const finish = () => {
+  const finish = (instant) => {
     if (finished) return; finished = true;
-    try { sessionStorage.setItem("introSeen", "1"); } catch (e) {}
-    intro.classList.add("open");
-    document.body.classList.remove("locked");
-    startPage();
-    setTimeout(() => intro.classList.add("gone"), 750);
+    clearTimeout(hitTimer);
+    unlock();
+    startPage();                                   // the kaiju rises and the beams fire as the screen opens
+    if (instant) {
+      intro.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: "ease-out" }).onfinish = () => intro.classList.add("done");
+      return;
+    }
+    const f = document.createElement("div"); f.className = "flash"; document.body.append(f);
+    f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 480, easing: "ease-out" }).onfinish = () => f.remove();
+    const hero = document.querySelector(".hero"); hero.classList.add("shake"); setTimeout(() => hero.classList.remove("shake"), 460);
+    stage.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: "forwards" });
+    zap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: "forwards" });
+    const e = "cubic-bezier(.75,0,.2,1)";
+    a.animate([{ transform: "none" }, { transform: "translate(-6vw,-75vh) rotate(-5deg)" }], { duration: 650, easing: e, fill: "forwards" });
+    b.animate([{ transform: "none" }, { transform: "translate(6vw,75vh) rotate(-5deg)" }], { duration: 650, easing: e, fill: "forwards" });
+    setTimeout(() => intro.classList.add("done"), 680);
   };
-  const timer = setTimeout(finish, 1900);
-  intro.addEventListener("click", () => { clearTimeout(timer); finish(); });
-  addEventListener("keydown", (e) => { if (e.key === "Escape" || e.key === "Enter" || e.key === " ") { clearTimeout(timer); finish(); } }, { once: true });
-}
+  const hitTimer = setTimeout(() => finish(false), 1200);
+  ["pointerdown", "keydown", "wheel", "touchstart"].forEach((ev) =>
+    addEventListener(ev, function once() { removeEventListener(ev, once); finish(true); }, { passive: true }));
+})();
 </script>
 </body>
 </html>
