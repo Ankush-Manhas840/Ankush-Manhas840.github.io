@@ -612,11 +612,11 @@
   <article class="mission reveal wip">
     <div class="wm" aria-hidden="true">詐欺</div>
     <div class="m-head">
-      <div class="m-num">Mission 03 <span class="live-dot">● Active · updated Oct 17, 2026</span></div>
+      <div class="m-num">Mission 03 <span class="live-dot">● Complete · live since Oct 25, 2026</span></div>
       <h3>Real-Time Fraud Detection</h3>
       <div class="jp-sub">实时欺诈检测</div>
-      <p>A small local copy of a payment company's fraud pipeline: stream card transactions one at a time, build live per-card features, score each one with a tracked model, explain every decision and watch for drift. Built on IBM TabFormer, 24.4 million synthetic card transactions from 2,000 people.</p>
-      <div class="meta-row"><span class="pill wip">◐ In progress</span><span class="pill">XGBoost</span><span class="pill">Kafka</span><span class="pill">Redis</span><span class="pill">FastAPI</span><span class="pill">MLflow</span><span class="pill">SHAP</span></div>
+      <p>A small local copy of a payment company's fraud pipeline: stream card transactions one at a time, build live per-card features, score each one in about 10 ms, explain every decision and watch for drift. Now live online. Built on IBM TabFormer, 24.4 million synthetic card transactions from 2,000 people.</p>
+      <div class="meta-row"><span class="pill live">● Live on Streamlit</span><span class="pill">Kafka</span><span class="pill">Redis</span><span class="pill">FastAPI</span><span class="pill">Docker</span><span class="pill">scikit-learn</span><span class="pill">GitHub Actions</span></div>
     </div>
     <div class="stats">
       <div><b data-count="24.4" data-dec="1" data-suffix="M">0</b><small>transactions in the dataset</small></div>
@@ -629,30 +629,31 @@
         <div class="lbl">Build progress — by phase</div>
         <div class="phases">
           <div class="ph done"><div class="row"><span>Data and EDA</span><span>100%</span></div><div class="track"><div class="fillb" data-w="100"></div></div></div>
-          <div class="ph now"><div class="row"><span>Models and tracking</span><span>40%</span></div><div class="track"><div class="fillb" data-w="40"></div></div></div>
-          <div class="ph"><div class="row"><span>Streaming and Redis</span><span>10%</span></div><div class="track"><div class="fillb" data-w="10"></div></div></div>
-          <div class="ph"><div class="row"><span>API and tests</span><span>0%</span></div><div class="track"><div class="fillb" data-w="0"></div></div></div>
-          <div class="ph"><div class="row"><span>Monitoring and dashboard</span><span>0%</span></div><div class="track"><div class="fillb" data-w="0"></div></div></div>
+          <div class="ph done"><div class="row"><span>Models</span><span>100%</span></div><div class="track"><div class="fillb" data-w="100"></div></div></div>
+          <div class="ph done"><div class="row"><span>Streaming and Redis</span><span>100%</span></div><div class="track"><div class="fillb" data-w="100"></div></div></div>
+          <div class="ph done"><div class="row"><span>API, Docker and tests</span><span>100%</span></div><div class="track"><div class="fillb" data-w="100"></div></div></div>
+          <div class="ph done"><div class="row"><span>Monitoring and dashboard</span><span>100%</span></div><div class="track"><div class="fillb" data-w="100"></div></div></div>
         </div>
         <div class="lbl" style="margin-top:28px">Pipeline</div>
         <ol class="pipe">
           <li class="done"><b>Data</b><span>TabFormer</span></li>
-          <li class="now"><b>Model</b><span>LogReg → XGBoost</span></li>
-          <li><b>Stream</b><span>Kafka</span></li>
-          <li><b>Features</b><span>Redis</span></li>
-          <li><b>Score</b><span>FastAPI + SHAP</span></li>
-          <li><b>Monitor</b><span>Evidently</span></li>
+          <li class="done"><b>Model</b><span>Logistic regression</span></li>
+          <li class="done"><b>Stream</b><span>Kafka</span></li>
+          <li class="done"><b>Features</b><span>Redis</span></li>
+          <li class="done"><b>Score</b><span>FastAPI · 10 ms</span></li>
+          <li class="done"><b>Monitor</b><span>SQLite + Evidently</span></li>
         </ol>
       </div>
       <div>
         <div class="finding"><h4>Threw out the first dataset</h4><p>EDA on PaySim showed senders almost never repeat and the balance columns leak the label. A per-card real-time system needs history, so I moved to IBM TabFormer.</p></div>
         <div class="finding"><h4>A strong feature made it worse</h4><p>Adding card-use type cut frauds in the top 1,000 alerts from 150 to 17. Online fraud fell from 66 to 0 per 10,000 after 2017 — drift, confirmed on a second group of people. The feature stays out.</p></div>
         <div class="finding"><h4>Tested on people it never saw</h4><p>Scored 253 new people in a later period without retraining. Per-card history features ("is this the card's usual hour?") lifted it from 142 to 177 frauds in the top 1,000 alerts, against about 1 for random guessing and 135 for XGBoost.</p></div>
-        <div class="finding next"><h4>Next up</h4><p>XGBoost on the same five features, then the training script, MLflow tracking and the streaming pipeline.</p></div>
+        <div class="finding"><h4>Real-time and live</h4><p>Kafka streams each payment, Redis holds every card's history, FastAPI scores it in about 10 ms. Live features match training 100%, checked in CI. Deployed with Aiven Kafka, Redis Cloud and Streamlit: try your own purchase and watch the model react.</p></div>
       </div>
     </div>
     <div class="m-foot">
-      <a class="btn fill" href="https://github.com/Ankush-Manhas840/fraud-detection-realtime" target="_blank" rel="noopener">Follow the build</a>
+      <a class="btn fill" href="https://fraud-check.streamlit.app/" target="_blank" rel="noopener">Try the live demo</a>
+      <a class="btn" href="https://github.com/Ankush-Manhas840/fraud-detection-realtime" target="_blank" rel="noopener">Code and write-up</a>
       <a class="btn line" href="https://github.com/Ankush-Manhas840/fraud-detection-realtime/commits/main" target="_blank" rel="noopener">Latest commits</a>
     </div>
   </article>

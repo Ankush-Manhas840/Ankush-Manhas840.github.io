@@ -164,9 +164,9 @@ footer{padding:32px 0;color:var(--dim);font-size:13px;text-align:center;border-t
 
   <!-- fraud -->
   <article class="project feature reveal">
-    <div class="ptop"><span class="tag wip">● Ongoing · updated October 2026</span><span class="tag">Python</span><span class="tag">pandas</span><span class="tag">scikit-learn</span><span class="tag">XGBoost</span></div>
+    <div class="ptop"><span class="tag live">● Live · October 2026</span><span class="tag">Kafka</span><span class="tag">Redis</span><span class="tag">FastAPI</span><span class="tag">Docker</span><span class="tag">scikit-learn</span></div>
     <h3>Real-Time Fraud Detection</h3>
-    <p class="desc">A small version of a payment company's fraud pipeline, built on IBM TabFormer: 24.4 million card transactions from 2,000 people, about 12 frauds in every 10,000. The hard part is not the model. It is keeping the future out of the training data.</p>
+    <p class="desc">A small version of a payment company's fraud pipeline, built on IBM TabFormer: 24.4 million card transactions from 2,000 people, about 12 frauds in every 10,000. The hard part is not the model. It is keeping the future out of the training data. It now runs live: Kafka streams each payment, Redis holds every card's history, and FastAPI scores it in about 10 ms.</p>
 
     <div class="grid2">
       <div class="box">
@@ -194,13 +194,13 @@ footer{padding:32px 0;color:var(--dim);font-size:13px;text-align:center;border-t
     </div>
 
     <div class="box" style="margin-top:20px">
-      <div class="k">Build progress</div>
-      <div class="pipe"><span class="done">Data and EDA ✓</span><b>→</b><span class="now">Models and tracking</span><b>→</b><span>Kafka stream</span><b>→</b><span>Redis features</span><b>→</b><span>FastAPI + SHAP</span><b>→</b><span>Drift monitoring</span></div>
+      <div class="k">Build complete</div>
+      <div class="pipe"><span class="done">Data and EDA ✓</span><b>→</b><span class="done">Model ✓</span><b>→</b><span class="done">Kafka stream ✓</span><b>→</b><span class="done">Redis features ✓</span><b>→</b><span class="done">FastAPI in Docker ✓</span><b>→</b><span class="done">Monitoring ✓</span><b>→</b><span class="done">Live ✓</span></div>
     </div>
 
     <div class="links">
-      <a class="btn primary" href="https://github.com/Ankush-Manhas840/fraud-detection-realtime" target="_blank" rel="noopener">View code and write-up</a>
-      <a class="btn" href="https://github.com/Ankush-Manhas840/fraud-detection-realtime/commits/main" target="_blank" rel="noopener">Follow the build</a>
+      <a class="btn primary" href="https://fraud-check.streamlit.app/" target="_blank" rel="noopener">Try the live demo</a>
+      <a class="btn" href="https://github.com/Ankush-Manhas840/fraud-detection-realtime" target="_blank" rel="noopener">View code and write-up</a>
     </div>
   </article>
 
