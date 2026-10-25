@@ -372,8 +372,8 @@
   #intro .half.b { clip-path: polygon(49% 0, 100% 0, 100% 100%, 85% 100%); }
   #intro .i-word { position: absolute; left: 50%; top: 50%; translate: -50% -50%; font-family: "Noto Sans SC", var(--jp); font-weight: 900; font-size: min(46vw, 46vh); color: transparent; -webkit-text-stroke: 2px rgba(226,35,46,.5); opacity: 0; }
   #intro.done { display: none; }
-  .hero.shake { animation: shake .42s cubic-bezier(.36,.07,.19,.97); }
-  @keyframes shake { 10%,90% { transform: translate(-2px,1px); } 20%,80% { transform: translate(5px,-3px); } 30%,50%,70% { transform: translate(-8px,3px); } 40%,60% { transform: translate(8px,-2px); } }
+  .hero.shake { animation: shake .45s linear; }   /* same shake as the kaiju edition */
+  @keyframes shake { 0%,100% { translate: 0 0; } 15% { translate: -10px 6px; } 30% { translate: 9px -7px; } 45% { translate: -7px -5px; } 60% { translate: 6px 6px; } 75% { translate: -4px 3px; } }
   .flash { position: fixed; inset: 0; z-index: 299; pointer-events: none; background: radial-gradient(circle at 50% 50%, rgba(255,60,70,.55), rgba(226,35,46,.15) 60%, transparent); }
 
 
@@ -1113,7 +1113,7 @@ nav { top: 34px !important; }
       // impact: flash, shake, and the screen comes apart along the claw line
       const f = document.createElement('div'); f.className = 'flash'; document.body.append(f);
       f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 520, easing: 'ease-out' }).onfinish = () => f.remove();
-      const hs = document.querySelector('.hero'); hs.classList.add('shake'); setTimeout(() => hs.classList.remove('shake'), 450);
+      const hs = document.querySelector('.hero'); hs.classList.add('shake'); setTimeout(() => hs.classList.remove('shake'), 460);
       const e = 'cubic-bezier(.75,0,.2,1)';
       intro.querySelector('.a').animate([{ transform: 'none' }, { transform: 'translate(-60vw,-30vh) rotate(-6deg)' }], { duration: 650, easing: e, fill: 'forwards' });
       intro.querySelector('.b').animate([{ transform: 'none' }, { transform: 'translate(60vw,30vh) rotate(6deg)' }], { duration: 650, easing: e, fill: 'forwards' });
