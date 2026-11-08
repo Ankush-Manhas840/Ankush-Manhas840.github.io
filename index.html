@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ankush Manhas — Machine Learning Engineer</title>
-<meta name="description" content="Junior machine learning engineer. Time-ordered data, leakage checks, honest evaluation. Fraud detection on 24 million card transactions.">
+<title>Ankush Manhas — AI Trainer and Data Annotator</title>
+<meta name="description" content="AI Trainer and Data Annotator. Evaluates AI answers against hand-verified ground truth; audited a 24.4M-row fraud dataset for leakage and drift.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
@@ -171,15 +171,15 @@ nav { top: 34px !important; }
 <div class="ed-bar" role="navigation" aria-label="Portfolio themes"><span>Theme</span><a href="index.html" class="on" aria-current="page">Terminal<small>(main)</small></a><a href="kaiju-edition.html">Kaiju</a><a href="game-edition.html">Game</a><a href="clean-edition.html">Clean</a></div>
 
 <nav><div class="wrap">
-  <span class="prompt"><b>ankush@ml</b>:<i>~/portfolio</i>$<span class="caret"></span></span>
+  <span class="prompt"><b>ankush@ai</b>:<i>~/portfolio</i>$<span class="caret"></span></span>
   <ul><li><a href="#lab">lab</a></li><li><a href="#work">experiments</a></li><li><a href="#method">method</a></li><li><a href="#skills">skills</a></li><li><a href="#contact">contact</a></li></ul>
   <a class="dl" href="resume.pdf" download>resume.pdf ↓</a>
 </div></nav>
 
 <header class="hero" id="lab"><div class="wrap">
-  <div class="hello"><span>●</span> open to junior machine learning roles · remote or relocate · Mukerian, India</div>
-  <h1>Ankush Manhas<br><span class="s">builds models that</span> <em class="s">don't cheat.</em></h1>
-  <span class="rot">Machine learning engineer who <b id="rot">finds leakage.</b></span>
+  <div class="hello"><span>●</span> open to AI Trainer and data annotation roles · remote or relocate · Mukerian, India</div>
+  <h1>Ankush Manhas<br><span class="s">checks AI answers</span> <em class="s">against the truth.</em></h1>
+  <span class="rot">AI Trainer and Data Annotator who <b id="rot">checks every answer.</b></span>
 
   <div class="lab rv in">
     <div class="labbar">
@@ -262,9 +262,9 @@ nav { top: 34px !important; }
         <p class="d">Ask about Indian listed companies in plain English ("Compare Maruti and M&amp;M profit margins FY23–FY25") and get answers from their annual reports, with page citations and numbers worked out by code, not guessed by the language model.</p>
         <div class="tags"><span>langchain</span><span>langgraph</span><span>rag</span><span>gemini</span><span>qdrant</span><span>bm25</span><span>reranker</span><span>ragas</span><span>fastapi</span><span>streamlit</span></div>
         <ul class="log">
-          <li class="z"><b>Evals before improvements</b>A set of 50 questions checked against Screener.in measures retrieval, numeric accuracy and faithfulness, so every change has to prove itself.</li>
+          <li class="z"><b>Answer key before improvements</b>A hand-verified key of 24 financial metrics (revenue, margin, D/E, ROE, EPS), each tied to its source PDF page. No answer is accepted without a citation.</li>
           <li class="z"><b>Four versions, measured</b>Naive RAG, then table-aware parsing, then hybrid search with a reranker, then an agent with a calculator and number verification.</li>
-          <li class="z"><b>Built in public</b>Work starts 1 November. The commit history shows the progress day by day.</li>
+          <li class="z"><b>Annotation guidelines</b>Written for PDF failure modes: ₹ mis-decoding, ₹ million vs ₹ crore, Indian digit grouping. Query expansion ("PAT" → "profit after tax") scored 0.55 vs 0.08, beating a larger embedding model (0.35).</li>
         </ul>
       </div>
       <div>
@@ -359,18 +359,20 @@ nav { top: 34px !important; }
 </div></section>
 
 <section id="skills"><div class="wrap">
-  <div class="head rv"><span class="big">03</span><div><h2>Toolkit</h2><p>Python every day, from raw data to a tested, deployed model. Green ones are what I use most.</p></div></div>
+  <div class="head rv"><span class="big">03</span><div><h2>Toolkit</h2><p>Evaluating AI answers and checking data, with Python underneath. Green ones are what I use most.</p></div></div>
   <div class="sk">
+    <div class="skc rv"><h4>ai evaluation</h4><div class="chips"><span class="k">response quality</span><span class="k">ground-truth benchmarks</span><span class="k">instruction following</span><span>factual accuracy</span><span>annotation guidelines</span><span>data labeling</span><span>human-in-the-loop review</span><span>error analysis</span></div></div>
+    <div class="skc rv"><h4>ai assistants</h4><div class="chips"><span class="k">chatgpt</span><span class="k">gemini</span><span class="k">claude</span><span>perplexity</span><span>prompt engineering</span><span>multi-turn conversations</span><span>json output</span></div></div>
     <div class="skc rv"><h4>machine learning</h4><div class="chips"><span class="k">time-based validation</span><span class="k">leakage checks</span><span class="k">cross-validation</span><span>logistic regression</span><span>random forests</span><span>xgboost</span><span>class imbalance</span><span>PR-AUC</span><span>error analysis</span><span>drift analysis</span></div></div>
     <div class="skc rv"><h4>data</h4><div class="chips"><span class="k">python</span><span class="k">pandas</span><span>numpy</span><span>data cleaning</span><span>data-quality checks</span><span>large files in chunks</span><span>parquet</span><span>sql</span></div></div>
     <div class="skc rv"><h4>production</h4><div class="chips"><span class="k">fastapi</span><span class="k">docker</span><span>kafka</span><span>redis</span><span>pydantic</span><span>pytest</span><span>github actions</span><span>evidently</span><span>sqlite</span><span>cloud deployment</span></div></div>
     <div class="skc rv"><h4>tools</h4><div class="chips"><span class="k">scikit-learn</span><span>git</span><span>jupyter</span><span>streamlit</span><span>linux</span><span>matplotlib</span><span>java</span></div></div>
   </div>
-  <div class="edu rv"><div><b>B.Tech, Computer Science</b><p>Chandigarh University · May 2026 · CGPA 7.2 / 10</p></div><a class="btn" href="https://github.com/Ankush-Manhas840/Practice" target="_blank" rel="noopener">Daily algorithms practice →</a></div>
+  <div class="edu rv"><div><b>B.Tech, Computer Science</b><p>Chandigarh University · May 2026 · CGPA 7.2 / 10</p><p>Mastering Model Mechanics (AI Agent Evaluation) — Mercor, 2026 · Introduction to AI — IBM, 2025 · Computer Vision Specialization — CU Boulder, 2026</p><p>English, Hindi, Punjabi</p></div><a class="btn" href="https://github.com/Ankush-Manhas840/Practice" target="_blank" rel="noopener">Daily algorithms practice →</a></div>
 </div></section>
 
 <section class="end" id="contact"><div class="wrap rv">
-  <h2>Got messy data?<br><em class="s">Let's talk.</em></h2>
+  <h2>Need AI answers checked?<br><em class="s">Let's talk.</em></h2>
   <p>Based in Mukerian, Punjab, India. Open to remote work and to relocation.</p>
   <div class="cta">
     <a class="btn main" href="mailto:ankushmanhas10736@gmail.com">Email me</a>
@@ -386,7 +388,7 @@ nav { top: 34px !important; }
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* rotating line */
-const words=["finds leakage.","splits by time.","doubts good results.","tests on unseen data.","writes it all down."];
+const words=["checks every answer.","builds the answer key first.","finds label leakage.","catches drift.","writes it all down."];
 const rot=document.getElementById('rot');let wi=0;
 if(!reduce)setInterval(()=>{wi=(wi+1)%words.length;let s=words[wi],i=0;rot.textContent='';
   const t=setInterval(()=>{rot.textContent=s.slice(0,++i);if(i>=s.length)clearInterval(t)},38)},2600);
