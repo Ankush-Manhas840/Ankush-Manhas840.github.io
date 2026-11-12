@@ -9,7 +9,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M0 0h32v22L22 32H0z' fill='%23fcee0a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Saira+Extra+Condensed:wght@700;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Saira+Extra+Condensed:wght@700;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
   color-scheme:dark;
@@ -33,8 +33,8 @@ h1,h2,h3,p{margin:0}
 
 /* ---------- screen layers ---------- */
 .fx{position:fixed;inset:0;pointer-events:none;z-index:80}
-.fx.scan{background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.14) 2px 3px);mix-blend-mode:multiply}
-.fx.noise{opacity:.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.fx.scan{background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.07) 2px 3px);mix-blend-mode:multiply}
+.fx.noise{opacity:.04;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .fx.vig{background:radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(0,0,0,.6))}
 .grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
@@ -254,23 +254,17 @@ h1,h2,h3,p{margin:0}
 @media (max-width:980px){.hex{display:none}}
 @media (prefers-reduced-motion:reduce){.slab::after{animation:none;display:none}.gbars{display:none}}
 
-/* ---------- light VHS tape effect ---------- */
-.fx.noise{animation:grain .5s steps(4) infinite}
-@keyframes grain{25%{background-position:40px -30px}50%{background-position:-60px 20px}75%{background-position:20px 60px}}
-.vhs-track{position:fixed;left:0;right:0;top:0;height:96px;z-index:82;pointer-events:none;
-  background:linear-gradient(transparent,rgba(255,255,255,.06) 38%,rgba(255,255,255,.13) 50%,rgba(255,255,255,.05) 62%,transparent),repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.22) 3px 4px);
-  backdrop-filter:blur(.7px) saturate(1.7) hue-rotate(-10deg);-webkit-backdrop-filter:blur(.7px) saturate(1.7) hue-rotate(-10deg);
-  transform:translateY(-130px);animation:track 8s linear infinite}
-@keyframes track{0%{transform:translateY(-130px)}55%,100%{transform:translateY(112vh)}}
-.vhs-head{position:fixed;left:0;right:0;bottom:0;height:18px;z-index:83;pointer-events:none;opacity:.75;mix-blend-mode:screen;filter:blur(.6px);
-  background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 24px,transparent 24px 70px,rgba(255,255,255,.28) 70px 150px,transparent 150px 230px,rgba(255,255,255,.4) 230px 250px,transparent 250px 420px);background-size:420px 100%;
-  -webkit-mask:linear-gradient(transparent,#000 70%);mask:linear-gradient(transparent,#000 70%);animation:head .3s steps(6) infinite}
-@keyframes head{to{background-position:-420px 0}}
-.vhs-osd{position:fixed;z-index:84;bottom:28px;pointer-events:none;font:400 28px/1 "VT323",ui-monospace,monospace;letter-spacing:.06em;color:#fff;opacity:.88;text-shadow:2px 0 var(--r),-2px 0 var(--c),0 0 6px rgba(255,255,255,.4)}
-.vhs-osd.a{left:24px;animation:blink 1.6s step-end infinite}
-.vhs-osd.b{right:24px}
-@media (max-width:980px){.vhs-osd{font-size:20px;bottom:22px}.vhs-osd.a{left:14px}.vhs-osd.b{right:14px}}
-@media (prefers-reduced-motion:reduce){.fx.noise,.vhs-track,.vhs-head,.vhs-osd.a{animation:none}.vhs-track{display:none}}
+/* ---------- about: who I am, stated plainly ---------- */
+.about{padding-bottom:0}
+.ab-lead{max-width:34em;margin-bottom:30px;font:600 clamp(22px,2.5vw,36px)/1.28 var(--ui);color:var(--fg);text-wrap:pretty}
+.ab-lead b{color:var(--y);font-weight:700}
+.about .pr .mono{color:var(--r)}
+.about .pr h3{margin-top:12px;font-size:clamp(30px,2.8vw,40px)}
+.about .pr p{font-size:18px;color:#c9cbd6}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:22px}
+.facts .b3 b{font-size:19px}
+@media (max-width:980px){.facts{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.facts{grid-template-columns:1fr}}
 
 /* ---------- emblem feed, scan section, hazard edge ---------- */
 .holo{flex:1;min-height:320px;display:flex;flex-direction:column}
@@ -402,14 +396,11 @@ html{scroll-behavior:smooth}
   <div class="bt"><b data-t="System online">System online</b></div>
 </div>
 <div class="gbars" id="gbars" aria-hidden="true"><i></i><i></i><i></i></div>
-<div class="vhs-track" aria-hidden="true"></div>
-<div class="vhs-head" aria-hidden="true"></div>
-<div class="vhs-osd a" aria-hidden="true">&#9654; PLAY</div>
-<div class="vhs-osd b" id="vhs-t" aria-hidden="true">SP 0:00:00</div>
 
 <header class="top">
   <a class="logo" href="#top" aria-label="Ankush Manhas, home">AM//</a>
   <nav aria-label="Sections">
+    <a href="#about"><sup>00</sup>About</a>
     <a href="#jobs"><sup>01</sup>Jobs</a>
     <a href="#method"><sup>02</sup>Method</a>
     <a href="#loadout"><sup>03</sup>Loadout</a>
@@ -469,6 +460,22 @@ html{scroll-behavior:smooth}
     <span>Open to work</span><span>Happy to relocate</span><span>Real-time fraud detection</span><span>Retrieval agents</span><span>Measured before trusted</span>
   </div>
 </div>
+
+<section class="jobs about" id="about">
+  <div class="j-head rv"><h2>Who <em>I am</em></h2><i></i><span class="mono">In short</span></div>
+  <p class="ab-lead rv">I am <b>Ankush Manhas</b>, a Computer Science graduate (B.Tech, Chandigarh University, 2026). I am looking for a full-time role as an <b>AI or Machine Learning Engineer</b>.</p>
+  <div class="proto">
+    <div class="pr cut rv"><span class="mono">What I do 01</span><h3>Build models and test them honestly</h3><p>I split data by time, hunt for leaks, and check results against answers I verified by hand, so the score means something.</p></div>
+    <div class="pr cut rv"><span class="mono">What I do 02</span><h3>Ship them as real services</h3><p>I put models behind FastAPI, pack them in Docker, feed them through Kafka and Redis, and deploy them where anyone can open the demo.</p></div>
+    <div class="pr cut rv"><span class="mono">What I do 03</span><h3>Build agents on language models</h3><p>I build retrieval systems with LangChain and LangGraph that read long reports and show the page each answer came from.</p></div>
+  </div>
+  <div class="facts">
+    <div class="b3 cut rv"><span class="mono">Role I want</span><b>AI or Machine Learning Engineer</b></div>
+    <div class="b3 cut rv"><span class="mono">Status</span><b>Open to work now</b></div>
+    <div class="b3 cut rv"><span class="mono">Location</span><b>Punjab, India. Happy to relocate</b></div>
+    <div class="b3 cut rv"><span class="mono">Education</span><b>B.Tech, Computer Science, 2026</b></div>
+  </div>
+</section>
 
 <section class="scanband" id="scanband">
   <div class="sb-t rv">
@@ -714,12 +721,6 @@ if (!REDUCED) {
   (function loop() { setTimeout(() => { glitch(); loop(); }, 3800 + Math.random() * 3600); })();
   nameEl.addEventListener('pointerenter', glitch);
 }
-
-/* tape counter */
-(function () {
-  const el = document.getElementById('vhs-t'), t0 = Date.now(), p = (n) => String(n).padStart(2, '0');
-  setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); el.textContent = 'SP ' + Math.floor(s / 3600) + ':' + p(Math.floor(s / 60) % 60) + ':' + p(s % 60); }, 1000);
-})();
 
 /* emblem feed */
 (function () {

@@ -3,7 +3,8 @@
 (function () {
   const THEMES = [
     { id: 'cyber', name: 'Cyberpunk', line: 'Loud yellow, glitch and tape noise', href: 'index.html', bg: '#fcee0a', fg: '#000000', ac: '#ff003c', glyph: 'AM//' },
-    { id: 'omen', name: 'Shadow', line: 'Violet smoke and a hooded phantom', href: 'omen.html', bg: '#0e0a1b', fg: '#eeebf7', ac: '#7b5cff', glyph: '影' }
+    { id: 'omen', name: 'Shadow', line: 'Violet smoke and a hooded phantom', href: 'omen.html', bg: '#0e0a1b', fg: '#eeebf7', ac: '#7b5cff', glyph: '影' },
+    { id: 'venom', name: 'Symbiote', line: 'Black living goo with a red edge', href: 'venom.html', bg: '#060607', fg: '#f4f2ec', ac: '#ff2740', glyph: 'V' }
   ];
   const file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const cur = THEMES.find((t) => t.href === file) || THEMES[0];
