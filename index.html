@@ -203,9 +203,15 @@ h1,h2,h3,p{margin:0}
 @keyframes stripR{to{transform:translateX(101%)}}
 
 /* ---------- opening: line opens into text, colour flip, squash out ---------- */
-#boot{background:#0a0c12;padding:0;overflow:hidden;cursor:pointer}
-#boot.flip{background:var(--y)}
-.bp{position:absolute;inset:0}
+#boot{background:#000;padding:0;overflow:hidden;cursor:pointer}
+#boot .box{margin:0 24px;width:min(560px,calc(100% - 48px))}
+#boot.tx .box{display:none}
+#boot.flip .strips{visibility:visible}
+#boot.shut .bt,#boot.shut .bl,#boot.shut .bp{display:none}
+.bp{position:absolute;inset:0;display:none}
+#boot.tx .bp{display:block}
+#boot .bt{display:none}
+#boot.tx .bt{display:block}
 .bp i{position:absolute;width:6px;height:6px;background:var(--r);animation:bpk 1.1s steps(1) infinite}
 @keyframes bpk{0%,100%{opacity:0}18%,62%{opacity:1}70%{opacity:.3}}
 #boot.flip .bp i{background:#000}
@@ -221,7 +227,7 @@ h1,h2,h3,p{margin:0}
 #boot.s6 .bt{opacity:0;animation:none}
 @keyframes bopen{from{transform:scaleY(.012)}to{transform:scaleY(1)}}
 @keyframes bclose{from{transform:scaleY(1)}to{transform:scaleY(.012)}}
-.bt b{position:relative;display:block;font:900 clamp(38px,8.6vw,150px)/.86 var(--disp);text-transform:uppercase;color:#ece8d9;white-space:nowrap}
+.bt b{position:relative;display:block;font:900 clamp(58px,13.5vw,230px)/.86 var(--disp);text-transform:uppercase;color:#ece8d9;white-space:nowrap}
 #boot.s3 .bt b{font-size:clamp(58px,13.5vw,230px)}
 #boot.flip .bt b{color:#000}
 .bt b::before,.bt b::after{content:attr(data-t);position:absolute;inset:0;opacity:0}
@@ -381,9 +387,19 @@ html{scroll-behavior:smooth}
 <div class="grid-bg" aria-hidden="true"></div>
 
 <div id="boot" aria-hidden="true">
+  <div class="box">
+    <div class="ln">&gt; BOOT SEQUENCE // PROFILE-OS 20.26</div>
+    <div class="ln">&gt; LOADING PROFILE ........ <b>ANKUSH MANHAS</b></div>
+    <div class="ln">&gt; LINKING KAFKA STREAM ... <b>OK</b></div>
+    <div class="ln">&gt; LINKING REDIS MEMORY ... <b>OK</b></div>
+    <div class="ln">&gt; FRAUD MODEL ............ <b>ONLINE</b></div>
+    <div class="ln ok">ACCESS GRANTED</div>
+    <div class="bar"></div>
+  </div>
+  <div class="strips"></div>
   <div class="bp"></div>
   <div class="bl"></div>
-  <div class="bt"><span class="bm">AM//</span><b data-t="Measured before trusted">Measured before trusted</b></div>
+  <div class="bt"><b data-t="System online">System online</b></div>
 </div>
 <div class="gbars" id="gbars" aria-hidden="true"><i></i><i></i><i></i></div>
 <div class="vhs-track" aria-hidden="true"></div>
@@ -651,7 +667,12 @@ document.querySelectorAll('.seg').forEach((s) => {
 (function () {
   const boot = document.getElementById('boot');
   if (REDUCED) return;
-  const bp = boot.querySelector('.bp'), txt = boot.querySelector('.bt b');
+  const bar = boot.querySelector('.bar');
+  for (let i = 0; i < 24; i++) bar.appendChild(document.createElement('i'));
+  const segs = bar.children, lines = boot.querySelectorAll('.ln');
+  const strips = boot.querySelector('.strips');
+  for (let i = 0; i < 8; i++) { const s = document.createElement('i'); s.style.setProperty('--i', i); strips.appendChild(s); }
+  const bp = boot.querySelector('.bp');
   for (let i = 0; i < 24; i++) {
     const p = document.createElement('i');
     p.style.left = (4 + Math.random() * 92) + '%'; p.style.top = (6 + Math.random() * 88) + '%';
@@ -662,17 +683,22 @@ document.querySelectorAll('.seg').forEach((s) => {
   let done = false; const T = [];
   const at = (ms, fn) => T.push(setTimeout(fn, ms));
   const zap = () => { boot.classList.remove('g'); void boot.offsetWidth; boot.classList.add('g'); };
+  const end = () => { boot.remove(); glitch(); countChips(); };
   function finish() {
     if (done) return; done = true; T.forEach(clearTimeout);
-    boot.remove(); glitch(); countChips();
+    boot.classList.add('tx', 'flip', 'shut');
+    setTimeout(end, 820);
   }
-  at(60, () => boot.classList.add('s1'));
-  at(330, () => { boot.classList.add('s2'); zap(); });
-  at(1180, () => { txt.textContent = 'Ankush Manhas'; txt.dataset.t = 'Ankush Manhas'; boot.classList.add('s3'); zap(); });
-  at(1820, () => { boot.classList.add('flip'); zap(); });
-  at(2280, () => boot.classList.add('s5'));
-  at(2500, () => boot.classList.add('s6'));
-  at(2720, finish);
+  lines.forEach((l, i) => at(140 + i * 210, () => l.classList.add('on')));
+  for (let i = 0; i < 24; i++) at(100 + i * 55, () => segs[i] && segs[i].classList.add('on'));
+  const S = 1650;
+  at(S, () => boot.classList.add('tx', 's1'));
+  at(S + 270, () => { boot.classList.add('s2'); zap(); });
+  at(S + 1000, () => { boot.classList.add('flip'); zap(); });
+  at(S + 1450, () => boot.classList.add('s5'));
+  at(S + 1670, () => boot.classList.add('s6'));
+  at(S + 1900, () => boot.classList.add('shut'));
+  at(S + 2720, () => { done = true; end(); });
   boot.addEventListener('click', finish);
   addEventListener('keydown', finish, { once: true });
 })();
