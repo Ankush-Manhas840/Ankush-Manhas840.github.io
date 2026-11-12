@@ -2,482 +2,944 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ankush Manhas — AI Trainer and Data Annotator</title>
-<meta name="description" content="AI Trainer and Data Annotator. Evaluates AI answers against hand-verified ground truth; audited a 24.4M-row fraud dataset for leakage and drift.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050507">
+<meta name="description" content="Ankush Manhas, AI and Machine Learning Engineer. Real-time fraud detection with Kafka, Redis and FastAPI. Retrieval agents over annual reports.">
+<title>Ankush Manhas // AI and Machine Learning Engineer</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M0 0h32v22L22 32H0z' fill='%23fcee0a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Saira+Extra+Condensed:wght@700;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=VT323&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#07090c; --panel:#0d1117; --panel2:#11161e; --line:#1f2733; --line2:#2b3544;
-  --text:#e8edf3; --muted:#8b96a6; --dim:#5a6575;
-  --train:#4da3ff; --test:#ffb547; --fraud:#ff3d5a; --ok:#35e0a1;
-  --mono:'JetBrains Mono',ui-monospace,monospace; --serif:'Instrument Serif',Georgia,serif;
+  color-scheme:dark;
+  --y:#fcee0a; --c:#00f0ff; --r:#ff003c;
+  --bg:#050507; --panel:#0b0c11; --panel2:#11131a; --line:#23252f;
+  --fg:#e9e9ee; --mut:#7d8090;
+  --disp:"Saira Extra Condensed","Arial Narrow",sans-serif;
+  --ui:"Rajdhani",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --gut:clamp(16px,3vw,40px);
+  --snap:cubic-bezier(.2,.9,.1,1);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font:16px/1.6 'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-  background-size:56px 56px;opacity:.35;mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 75%)}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font:500 18px/1.45 var(--ui);overflow-x:clip;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:0 24px}
-@media(max-width:600px){.wrap{padding:0 16px}}
-.mono{font-family:var(--mono)}
-em.s{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:0}
+h1,h2,h3,p{margin:0}
+::selection{background:var(--c);color:#000}
+:focus-visible{outline:2px solid var(--c);outline-offset:3px}
+.mono{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase}
 
-/* top bar like a terminal */
-nav{position:sticky;top:0;z-index:30;background:rgba(7,9,12,.78);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px;font-family:var(--mono);font-size:13px}
-.prompt{color:var(--muted)} .prompt b{color:var(--ok);font-weight:500} .prompt i{font-style:normal;color:var(--text)}
-.caret{display:inline-block;width:8px;height:15px;background:var(--text);vertical-align:-2px;margin-left:3px;animation:blink 1s steps(1) infinite}
+/* ---------- screen layers ---------- */
+.fx{position:fixed;inset:0;pointer-events:none;z-index:80}
+.fx.scan{background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.14) 2px 3px);mix-blend-mode:multiply}
+.fx.noise{opacity:.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.fx.vig{background:radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(0,0,0,.6))}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    linear-gradient(rgba(0,240,255,.045) 1px,transparent 1px) 0 0/56px 56px,
+    linear-gradient(90deg,rgba(0,240,255,.045) 1px,transparent 1px) 0 0/56px 56px,
+    radial-gradient(60% 50% at 85% 20%,rgba(255,0,60,.16),transparent 70%),
+    radial-gradient(50% 50% at 70% 90%,rgba(0,240,255,.10),transparent 70%)}
+
+/* ---------- cursor ---------- */
+#cur,#cur-dot{position:fixed;left:0;top:0;pointer-events:none;z-index:100;mix-blend-mode:difference;display:none}
+#cur{width:34px;height:34px;margin:-17px 0 0 -17px;
+  background:
+    linear-gradient(#fff,#fff) 0 0/9px 2px no-repeat,linear-gradient(#fff,#fff) 0 0/2px 9px no-repeat,
+    linear-gradient(#fff,#fff) 100% 0/9px 2px no-repeat,linear-gradient(#fff,#fff) 100% 0/2px 9px no-repeat,
+    linear-gradient(#fff,#fff) 0 100%/9px 2px no-repeat,linear-gradient(#fff,#fff) 0 100%/2px 9px no-repeat,
+    linear-gradient(#fff,#fff) 100% 100%/9px 2px no-repeat,linear-gradient(#fff,#fff) 100% 100%/2px 9px no-repeat;
+  transition:width .18s var(--snap),height .18s var(--snap),margin .18s var(--snap)}
+#cur.on{width:58px;height:58px;margin:-29px 0 0 -29px}
+#cur-dot{width:4px;height:4px;margin:-2px 0 0 -2px;background:#fff}
+@media (pointer:fine){html.js,html.js a,html.js button{cursor:none}html.js #cur,html.js #cur-dot{display:block}}
+
+/* ---------- boot ---------- */
+#boot{position:fixed;inset:0;z-index:90;background:#000;display:grid;place-items:center;padding:24px}
+#boot .box{width:min(560px,100%)}
+#boot .ln{font-family:var(--mono);font-size:13px;letter-spacing:.06em;color:var(--y);opacity:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.9}
+#boot .ln.on{opacity:1}
+#boot .ln b{color:var(--c);font-weight:500}
+#boot .ln.ok{color:#000;background:var(--y);display:inline-block;padding:0 10px;margin-top:10px;font-weight:700}
+#boot .bar{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;margin-top:22px;height:14px}
+#boot .bar i{background:#1a1a1a}
+#boot .bar i.on{background:var(--y)}
+#boot.out{animation:bootout .55s steps(6) forwards}
+@keyframes bootout{to{clip-path:inset(0 0 100% 0)}}
+
+/* ---------- top bar ---------- */
+.top{position:relative;z-index:5;display:flex;align-items:center;gap:22px;height:60px;padding:0 var(--gut);border-bottom:1px solid var(--line);background:rgba(5,5,7,.8)}
+.logo{background:var(--y);color:#000;font:800 26px/1 var(--disp);letter-spacing:.02em;padding:7px 16px 6px 12px;clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
+.top nav{display:flex;gap:4px;margin-right:auto}
+.top nav a{font:600 15px/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);padding:10px 12px;position:relative;transition:color .1s steps(2)}
+.top nav a sup{font:400 9.5px var(--mono);color:var(--r);margin-right:6px;vertical-align:top}
+.top nav a:hover{color:#000;background:var(--y)}
+.stat{display:flex;gap:18px;color:var(--mut)}
+.stat b{color:var(--c);font-weight:500}
+.stat .live::before{content:"";display:inline-block;width:7px;height:7px;background:var(--r);margin-right:8px;animation:blink 1s step-end infinite}
 @keyframes blink{50%{opacity:0}}
-nav ul{display:flex;gap:22px;list-style:none;color:var(--muted)}
-nav ul a:hover{color:var(--text)}
-nav ul a::before{content:"./";color:var(--dim)}
-@media(max-width:760px){nav ul{display:none}}
-.dl{border:1px solid var(--line2);border-radius:8px;padding:6px 12px;color:var(--text);transition:.2s}
-.dl:hover{border-color:var(--ok);color:var(--ok)}
+@media (max-width:900px){.top nav{display:none}.logo{margin-right:auto}.stat span:not(.live){display:none}}
 
-/* hero */
-.hero{padding:56px 0 40px}
-.hello{font-family:var(--mono);color:var(--muted);font-size:14px;margin-bottom:18px}
-.hello span{color:var(--ok)}
-h1{font-size:clamp(44px,8.2vw,104px);line-height:.95;letter-spacing:-.045em;font-weight:700}
-h1 .s{color:var(--muted)}
-.rot{display:block;font-size:clamp(22px,3.2vw,36px);letter-spacing:-.02em;margin-top:18px;font-weight:500;color:var(--muted);min-height:1.3em}
-.rot b{color:var(--text);font-weight:500;border-right:2px solid var(--fraud);padding-right:4px}
+/* ---------- hero ---------- */
+.hero{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);gap:clamp(16px,2vw,28px);padding:clamp(16px,2vw,28px) var(--gut) 0;min-height:calc(100svh - 60px - 58px)}
+.slab{position:relative;container-type:inline-size;background:var(--y);color:#000;display:flex;flex-direction:column;padding:clamp(20px,3vw,44px);
+  clip-path:polygon(0 0,calc(100% - 150px) 0,calc(100% - 128px) 22px,100% 22px,100% calc(100% - 72px),calc(100% - 72px) 100%,0 100%)}
+.slab::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+  repeating-linear-gradient(90deg,rgba(0,0,0,.05) 0 1px,transparent 1px 56px),
+  radial-gradient(80% 60% at 20% 0%,rgba(255,255,255,.35),transparent 70%)}
+.slab > *{position:relative}
+.s-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding-right:150px}
+.s-top .mono{font-weight:700}
+.tag{display:inline-flex;align-items:center;gap:8px;background:#000;color:var(--y);padding:5px 10px 5px 9px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.tag i{width:6px;height:6px;background:var(--c);box-shadow:0 0 8px var(--c)}
+.name{margin-top:auto;padding-top:26px;font:800 30cqw/.8 var(--disp);letter-spacing:-.012em;text-transform:uppercase}
+.name span{display:block;position:relative;width:max-content;max-width:100%}
+.name span::before,.name span::after{content:attr(data-t);position:absolute;inset:0;opacity:0;pointer-events:none}
+.name span::before{color:var(--r)}
+.name span::after{color:#00c8d6}
+.name.g span::before{opacity:1;animation:gl1 .42s steps(1) both}
+.name.g span::after{opacity:1;animation:gl2 .42s steps(1) both}
+@keyframes gl1{0%{clip-path:inset(8% 0 62% 0);transform:translate(-.06em,0)}25%{clip-path:inset(54% 0 22% 0);transform:translate(.05em,0)}50%{clip-path:inset(30% 0 48% 0);transform:translate(-.03em,0)}75%{clip-path:inset(76% 0 4% 0);transform:translate(.07em,0)}100%{clip-path:inset(0 0 100% 0)}}
+@keyframes gl2{0%{clip-path:inset(60% 0 10% 0);transform:translate(.07em,0)}25%{clip-path:inset(12% 0 70% 0);transform:translate(-.05em,0)}50%{clip-path:inset(66% 0 18% 0);transform:translate(.04em,0)}75%{clip-path:inset(20% 0 58% 0);transform:translate(-.06em,0)}100%{clip-path:inset(0 0 100% 0)}}
+.role{display:flex;align-items:center;gap:14px;margin-top:20px;font:700 clamp(17px,2.2cqw,24px)/1.1 var(--ui);letter-spacing:.16em;text-transform:uppercase}
+.role::before{content:"";width:46px;height:3px;background:#000;flex:none}
+.pitch{margin-top:14px;max-width:44ch;font:600 clamp(17px,2.25cqw,21px)/1.35 var(--ui);text-wrap:pretty}
+.acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px;padding-right:72px}
+.btn{position:relative;display:inline-flex;align-items:center;gap:12px;padding:15px 26px 14px 22px;font:700 16px/1 var(--ui);letter-spacing:.18em;text-transform:uppercase;isolation:isolate;
+  transition:transform .12s var(--snap)}
+.btn::before,.btn::after{content:"";position:absolute;inset:0;z-index:-1;clip-path:polygon(0 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%)}
+.btn::after{background:var(--c);transform:translate(0,0);z-index:-2;transition:transform .12s steps(3)}
+.btn:hover::after{transform:translate(6px,6px)}
+.btn:active{transform:translate(3px,3px)}
+.btn:active::after{transform:translate(0,0)}
+.btn.blk{color:var(--y)}.btn.blk::before{background:#000}
+.btn.out{color:#000}.btn.out::before{background:var(--y);box-shadow:inset 0 0 0 2px #000}
+.btn.out::after{background:var(--r)}
+.btn .k{font:500 10px var(--mono);letter-spacing:.1em;opacity:.7}
+.s-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:26px;padding-right:72px}
+.code{height:26px;flex:0 1 240px;background:repeating-linear-gradient(90deg,#000 0 2px,transparent 2px 5px,#000 5px 6px,transparent 6px 11px,#000 11px 15px,transparent 15px 17px)}
+.s-foot .mono{font-size:10px;font-weight:700;text-align:right;line-height:1.6}
 
-/* split lab */
-.lab{margin-top:40px;border:1px solid var(--line2);border-radius:18px;background:linear-gradient(180deg,var(--panel),#0a0e13);overflow:hidden;box-shadow:0 40px 120px -60px rgba(77,163,255,.35)}
-.labbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;color:var(--muted)}
-.dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--line2)}
-.dots i:nth-child(1){background:#ff5f57}.dots i:nth-child(2){background:#febc2e}.dots i:nth-child(3){background:#28c840}
-.switch{display:flex;background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:3px}
-.switch button{font:inherit;color:var(--muted);background:none;border:0;padding:7px 14px;border-radius:7px;cursor:pointer;transition:.25s}
-.switch button.on{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line2)}
-.switch button.on.bad{color:var(--fraud)} .switch button.on.good{color:var(--ok)}
-canvas{display:block;width:100%;height:340px;cursor:crosshair}
-@media(max-width:600px){canvas{height:260px}}
-.readout{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
-@media(max-width:760px){.readout{grid-template-columns:1fr 1fr}}
-.readout div{padding:14px 16px;border-right:1px solid var(--line);font-family:var(--mono)}
-.readout div:last-child{border-right:0}
-.readout small{display:block;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
-.readout b{font-size:20px;font-weight:500;font-variant-numeric:tabular-nums}
-.leak b{transition:color .3s}
-.leak.bad b{color:var(--fraud)} .leak.good b{color:var(--ok)}
-.labnote{padding:14px 16px;border-top:1px solid var(--line);font-size:14.5px;color:var(--muted);min-height:52px}
-.labnote b{color:var(--text);font-weight:500}
-.legend{display:flex;gap:14px;flex-wrap:wrap}
-.legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--c)}
+/* ---------- scanner column ---------- */
+.col{display:flex;flex-direction:column;gap:clamp(12px,1.4vw,18px);min-width:0}
+.cut{position:relative;background:var(--line);clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,22px 100%,0 calc(100% - 22px))}
+.cut::before{content:"";position:absolute;inset:1px;background:var(--panel);clip-path:polygon(0 0,calc(100% - 21.5px) 0,100% 21.5px,100% 100%,21.5px 100%,0 calc(100% - 21.5px))}
+.cut > *{position:relative}
+.scanr{flex:1;min-height:320px;display:flex;flex-direction:column}
+.scanr.cut{background:linear-gradient(135deg,var(--c),var(--line) 30%,var(--line) 70%,var(--r))}
+.sc-h{display:flex;justify-content:space-between;gap:10px;padding:14px 30px 12px 16px;border-bottom:1px solid var(--line);color:var(--mut)}
+.sc-h b{color:var(--c);font-weight:500}
+.sc-c{position:relative;flex:1;min-height:240px}
+.sc-c canvas{position:absolute;inset:0;width:100%;height:100%}
+.brk{position:absolute;width:18px;height:18px;border:2px solid var(--y);opacity:.9}
+.brk.a{left:12px;top:12px;border-right:0;border-bottom:0}.brk.b{right:12px;top:12px;border-left:0;border-bottom:0}
+.brk.c{left:12px;bottom:12px;border-right:0;border-top:0}.brk.d{right:12px;bottom:12px;border-left:0;border-top:0}
+.sc-f{display:flex;justify-content:space-between;gap:10px;padding:11px 16px 12px 30px;border-top:1px solid var(--line);color:var(--mut)}
+.sc-f b{color:var(--r);font-weight:500}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1vw,14px)}
+.chip{padding:14px 14px 13px 16px}
+.chip b{display:block;font:800 clamp(34px,3.4vw,52px)/.9 var(--disp);color:var(--y);letter-spacing:.01em}
+.chip b small{font-size:.5em;color:var(--fg);margin-left:3px}
+.chip span{display:block;margin-top:8px;font:500 10px/1.5 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.chip:nth-child(2) b{color:var(--c)}
 
-.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 20px;border-radius:10px;font-weight:500;border:1px solid var(--line2);transition:transform .2s,border-color .2s,background .2s;font-size:15px}
-.btn:hover{transform:translateY(-2px);border-color:var(--text)}
-.btn.main{background:var(--text);color:var(--bg);border-color:var(--text)}
-.btn.main:hover{background:#fff}
+/* ---------- tape ---------- */
+.tape{position:relative;z-index:3;margin-top:18px;height:40px;background:var(--y);color:#000;overflow:hidden;display:flex;align-items:center;transform:rotate(-.6deg) scaleX(1.02);
+  border-block:3px solid #000;box-shadow:0 0 0 1px var(--y)}
+.tape div{display:flex;flex:none;animation:run 26s linear infinite;font:700 17px/1 var(--ui);letter-spacing:.24em;text-transform:uppercase;white-space:nowrap}
+.tape span{padding:0 22px}
+.tape span::after{content:"///";margin-left:44px;color:var(--r)}
+@keyframes run{to{transform:translateX(-50%)}}
 
-/* section heads */
-section{position:relative;padding:96px 0 40px}
-.head{display:flex;align-items:flex-end;gap:20px;margin-bottom:40px;flex-wrap:wrap}
-.big{font-family:var(--mono);font-size:clamp(64px,10vw,120px);line-height:.8;color:transparent;-webkit-text-stroke:1px var(--line2);font-weight:700}
-.head h2{font-size:clamp(28px,4.2vw,46px);letter-spacing:-.03em;line-height:1.05;font-weight:700}
-.head p{color:var(--muted);margin-top:8px;max-width:560px}
+/* ---------- job card sample ---------- */
+.jobs{position:relative;z-index:2;padding:clamp(56px,7vw,110px) var(--gut) clamp(60px,7vw,110px);max-width:1500px;margin:0 auto}
+.j-head{display:flex;align-items:flex-end;gap:20px;margin-bottom:28px}
+.j-head h2{font:800 clamp(56px,8vw,128px)/.82 var(--disp);text-transform:uppercase;letter-spacing:-.005em}
+.j-head h2 em{font-style:normal;color:transparent;-webkit-text-stroke:1.5px var(--y)}
+.j-head .mono{color:var(--r);padding-bottom:10px}
+.j-head i{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent);margin-bottom:14px}
+.job{display:grid;grid-template-columns:150px minmax(0,1fr) minmax(0,340px)}
+.job.cut{clip-path:polygon(0 0,calc(100% - 34px) 0,100% 34px,100% 100%,34px 100%,0 calc(100% - 34px))}
+.job.cut::before{clip-path:polygon(0 0,calc(100% - 33.5px) 0,100% 33.5px,100% 100%,33.5px 100%,0 calc(100% - 33.5px))}
+.j-no{background:var(--y);color:#000;padding:22px 18px;display:flex;flex-direction:column;justify-content:space-between;margin:1px 0 1px 1px}
+.j-no b{font:900 120px/.78 var(--disp)}
+.j-no .mono{font-weight:700;font-size:10px;line-height:1.7}
+.j-main{padding:clamp(22px,2.6vw,38px)}
+.j-main h3{font:800 clamp(40px,4.6vw,68px)/.9 var(--disp);text-transform:uppercase;margin:14px 0 14px}
+.j-main p{color:#b9bbc6;max-width:58ch;text-wrap:pretty}
+.pill{display:inline-flex;align-items:center;gap:8px;font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--c);border:1px solid var(--c);padding:4px 10px}
+.pill i{width:6px;height:6px;background:var(--c);animation:blink 1s step-end infinite}
+.tech{display:flex;flex-wrap:wrap;gap:6px;margin-top:20px}
+.tech span{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;background:var(--panel2);color:var(--fg);border-left:2px solid var(--y)}
+.j-main .acts{padding:0;margin-top:26px}
+.btn.yl{color:#000}.btn.yl::before{background:var(--y)}
+.btn.ln{color:var(--y)}.btn.ln::before{background:var(--panel);box-shadow:inset 0 0 0 1.5px var(--y)}.btn.ln::after{background:var(--r)}
+.j-side{border-left:1px solid var(--line);padding:clamp(22px,2.6vw,34px);display:flex;flex-direction:column;gap:18px;justify-content:center}
+.meter .l{display:flex;justify-content:space-between;gap:10px;font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
+.meter .l b{color:var(--fg);font-weight:700}
+.seg{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;height:14px}
+.seg i{background:#1b1d26;transform:skewX(-18deg)}
+.seg i.on{background:var(--y)}
+.meter.red .seg i.on{background:var(--r)}
+.j-side .mono{color:var(--mut);font-size:10px;line-height:1.7}
+.endnote{margin-top:34px;color:var(--mut);text-align:center}
+.endnote b{color:var(--y);font-weight:500}
 
-/* experiment cards */
-.exp{border:1px solid var(--line2);border-radius:16px;background:var(--panel);margin-bottom:28px;overflow:hidden;transition:border-color .3s}
-.exp:hover{border-color:#3a4659}
-.exp.hot{border-color:rgba(255,61,90,.5);box-shadow:0 0 0 1px rgba(255,61,90,.12),0 50px 120px -70px rgba(255,61,90,.6)}
-.exph{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;padding:12px 20px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;color:var(--muted);background:var(--panel2)}
-.st{display:inline-flex;align-items:center;gap:7px}
-.st i{width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c)}
-.expb{padding:28px 24px;display:grid;grid-template-columns:1.1fr 1fr;gap:28px}
-@media(max-width:860px){.expb{grid-template-columns:1fr;padding:22px 18px}}
-.exp h3{font-size:clamp(24px,3.2vw,34px);letter-spacing:-.03em;line-height:1.1;margin-bottom:10px}
-.exp .d{color:var(--muted)}
-.tags{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 0}
-.tags span{font-family:var(--mono);font-size:11.5px;padding:3px 9px;border-radius:5px;border:1px solid var(--line2);color:var(--muted)}
-.log{font-family:var(--mono);font-size:13px;margin-top:22px;border-left:1px solid var(--line2);padding-left:16px}
-.log li{list-style:none;position:relative;padding:0 0 14px;color:var(--muted)}
-.log li::before{content:"";position:absolute;left:-20.5px;top:7px;width:8px;height:8px;border-radius:50%;background:var(--bg);border:1px solid var(--c,var(--line2))}
-.log li b{color:var(--text);font-weight:500;display:block;font-family:'Space Grotesk',sans-serif;font-size:15px}
-.log li.x{--c:var(--fraud)} .log li.y{--c:var(--ok)} .log li.z{--c:var(--test)}
-.chart{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:18px}
-.chart+.chart{margin-top:14px}
-.chart .k{font-family:var(--mono);font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
-.bar{display:grid;grid-template-columns:130px 1fr 58px;gap:10px;align-items:center;font-size:13.5px;margin-bottom:10px}
-@media(max-width:480px){.bar{grid-template-columns:96px 1fr 50px;font-size:12.5px}}
-.bar .l{color:var(--muted)}
-.bar .t{display:block;height:8px;background:#161c25;border-radius:99px;overflow:hidden}
-.bar .f{display:block;height:100%;width:0;background:var(--dim);border-radius:99px;transition:width 1.3s cubic-bezier(.2,.8,.2,1)}
-.bar .v{font-family:var(--mono);text-align:right}
-.f.r{background:var(--fraud)} .f.g{background:var(--ok)} .f.b{background:var(--train)}
-.big-n{font-family:var(--mono);font-size:44px;font-weight:700;letter-spacing:-.04em;line-height:1}
-.big-n small{font-size:16px;color:var(--muted);font-weight:400;letter-spacing:0}
-.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
-.links .btn{padding:9px 14px;font-size:14px}
-.pipe{display:flex;flex-wrap:wrap;gap:6px;font-family:var(--mono);font-size:11.5px}
-.pipe span{padding:4px 8px;border-radius:5px;border:1px solid var(--line2);color:var(--dim)}
-.pipe .done{color:var(--ok);border-color:rgba(53,224,161,.4)}
-.pipe .now{color:var(--test);border-color:rgba(255,181,71,.45);animation:glow 2s ease-in-out infinite}
-@keyframes glow{50%{box-shadow:0 0 14px rgba(255,181,71,.35)}}
+/* ---------- opening: slam and shutters ---------- */
+#boot .strips{position:absolute;inset:0;display:grid;grid-template-rows:repeat(8,1fr);visibility:hidden}
+#boot .strips i{background:var(--y)}
+#boot .strips i:nth-child(even){background:#f0e200}
+#boot .b-txt{position:absolute;inset:0;display:grid;place-items:center;visibility:hidden;color:#000;font:900 clamp(80px,19vw,300px)/.8 var(--disp);text-transform:uppercase;text-align:center}
+#boot.slam .strips,#boot.slam .b-txt{visibility:visible}
+#boot.slam .b-txt{animation:slam .5s steps(6) both}
+@keyframes slam{0%{transform:scale(1.6) skewX(-14deg);clip-path:inset(42% 0 42% 0)}35%{transform:scale(1.08) skewX(5deg);clip-path:inset(12% 0 26% 0)}65%{transform:translateX(-2%);clip-path:inset(0 0 9% 0)}100%{transform:none;clip-path:inset(0)}}
+#boot.shut{background:transparent;pointer-events:none}
+#boot.shut .box,#boot.shut .b-txt{display:none}
+#boot.shut .strips i{animation:stripL .5s cubic-bezier(.7,0,.2,1) both;animation-delay:calc(var(--i) * 40ms)}
+#boot.shut .strips i:nth-child(even){animation-name:stripR}
+@keyframes stripL{to{transform:translateX(-101%)}}
+@keyframes stripR{to{transform:translateX(101%)}}
 
-/* principles as code */
-.code{border:1px solid var(--line2);border-radius:16px;background:var(--panel);font-family:var(--mono);font-size:14px;overflow:hidden}
-.code .exph{border-bottom:1px solid var(--line)}
-.code pre{padding:22px 24px;overflow-x:auto;line-height:1.85;color:var(--muted);white-space:pre-wrap}
-.code .kw{color:#c792ea}.code .fn{color:var(--train)}.code .st2{color:var(--ok)}.code .cm{color:var(--dim)}.code .nu{color:var(--test)}
+/* ---------- opening: line opens into text, colour flip, squash out ---------- */
+#boot{background:#0a0c12;padding:0;overflow:hidden;cursor:pointer}
+#boot.flip{background:var(--y)}
+.bp{position:absolute;inset:0}
+.bp i{position:absolute;width:6px;height:6px;background:var(--r);animation:bpk 1.1s steps(1) infinite}
+@keyframes bpk{0%,100%{opacity:0}18%,62%{opacity:1}70%{opacity:.3}}
+#boot.flip .bp i{background:#000}
+.bl{position:absolute;left:7vw;right:7vw;top:50%;height:3px;margin-top:-1.5px;background:linear-gradient(90deg,var(--c),#fff 50%,var(--r));transform:scaleX(0)}
+#boot.s1 .bl{animation:blin .24s cubic-bezier(.2,.9,.1,1) forwards}
+#boot.s2 .bl{animation:none;opacity:0}
+#boot.s6 .bl{opacity:1;background:#000;animation:blout .2s cubic-bezier(.7,0,.8,.2) forwards}
+@keyframes blin{to{transform:scaleX(1)}}
+@keyframes blout{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.bt{position:relative;text-align:center;opacity:0;transform:scaleY(.012)}
+#boot.s2 .bt{opacity:1;animation:bopen .34s cubic-bezier(.2,.9,.1,1) forwards}
+#boot.s5 .bt{animation:bclose .2s cubic-bezier(.7,0,.8,.2) forwards}
+#boot.s6 .bt{opacity:0;animation:none}
+@keyframes bopen{from{transform:scaleY(.012)}to{transform:scaleY(1)}}
+@keyframes bclose{from{transform:scaleY(1)}to{transform:scaleY(.012)}}
+.bt b{position:relative;display:block;font:900 clamp(38px,8.6vw,150px)/.86 var(--disp);text-transform:uppercase;color:#ece8d9;white-space:nowrap}
+#boot.s3 .bt b{font-size:clamp(58px,13.5vw,230px)}
+#boot.flip .bt b{color:#000}
+.bt b::before,.bt b::after{content:attr(data-t);position:absolute;inset:0;opacity:0}
+.bt b::before{color:var(--r)}
+.bt b::after{color:var(--c)}
+#boot.g .bt b::before{opacity:1;animation:gl1 .34s steps(1) both}
+#boot.g .bt b::after{opacity:1;animation:gl2 .34s steps(1) both}
+.bm{display:none;margin-bottom:18px;padding:7px 16px 6px 12px;background:var(--y);color:#000;font:800 clamp(20px,2.6vw,40px)/1 var(--disp);letter-spacing:.02em;clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
+#boot.s3 .bm{display:inline-block}
+#boot.flip .bm{background:#000;color:var(--y)}
 
-/* skills */
-.sk{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-@media(max-width:860px){.sk{grid-template-columns:1fr}}
-.skc{border:1px solid var(--line2);border-radius:14px;padding:20px;background:var(--panel)}
-.skc h4{font-family:var(--mono);font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
-.chips{display:flex;flex-wrap:wrap;gap:7px}
-.chips span{font-size:14px;padding:5px 11px;border-radius:7px;border:1px solid var(--line2);transition:.2s}
-.chips span:hover{border-color:var(--text)}
-.chips span.k{border-color:rgba(53,224,161,.45);color:var(--ok)}
-.edu{margin-top:16px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:14px;border:1px solid var(--line2);border-radius:14px;padding:18px 20px;background:var(--panel)}
-.edu p{color:var(--muted);font-size:14.5px}
+/* ---------- motion graphics ---------- */
+.slab::after{content:"";position:absolute;left:0;right:0;top:-140px;height:140px;pointer-events:none;background:linear-gradient(transparent,rgba(255,255,255,.5),transparent);mix-blend-mode:overlay;animation:beam 5.5s linear infinite}
+@keyframes beam{to{transform:translateY(calc(100cqh + 1400px))}}
+.hex{position:absolute!important;right:20px;top:64px;width:104px;text-align:right;font-size:9.5px;line-height:1.75;font-weight:700;letter-spacing:.1em;opacity:.75;white-space:pre}
+.gbars{position:fixed;inset:0;z-index:85;pointer-events:none;mix-blend-mode:screen}
+.gbars i{position:absolute;left:0;right:0;height:0;background:var(--c);opacity:.75}
+.gbars i:nth-child(2){background:var(--r)}
+.band{position:relative;z-index:2;overflow:hidden;padding:0 0 clamp(56px,7vw,110px)}
+.band div{white-space:nowrap;font:900 clamp(96px,15vw,250px)/.86 var(--disp);text-transform:uppercase;color:transparent;-webkit-text-stroke:1.5px rgba(252,238,10,.55);will-change:transform}
+.band div + div{-webkit-text-stroke-color:rgba(0,240,255,.45)}
+.band b{font-weight:900;color:var(--y);-webkit-text-stroke:0}
+.band div + div b{color:var(--c)}
+@media (max-width:980px){.hex{display:none}}
+@media (prefers-reduced-motion:reduce){.slab::after{animation:none;display:none}.gbars{display:none}}
 
-/* contact */
-.end{text-align:center;padding:120px 0 80px}
-.end h2{font-size:clamp(40px,7vw,88px);letter-spacing:-.045em;line-height:.95}
-.end p{color:var(--muted);margin:18px auto 0;max-width:520px}
-.end .cta{justify-content:center}
-footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:22px 0;font-family:var(--mono);font-size:12px;color:var(--dim);text-align:center}
+/* ---------- light VHS tape effect ---------- */
+.fx.noise{animation:grain .5s steps(4) infinite}
+@keyframes grain{25%{background-position:40px -30px}50%{background-position:-60px 20px}75%{background-position:20px 60px}}
+.vhs-track{position:fixed;left:0;right:0;top:0;height:96px;z-index:82;pointer-events:none;
+  background:linear-gradient(transparent,rgba(255,255,255,.06) 38%,rgba(255,255,255,.13) 50%,rgba(255,255,255,.05) 62%,transparent),repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.22) 3px 4px);
+  backdrop-filter:blur(.7px) saturate(1.7) hue-rotate(-10deg);-webkit-backdrop-filter:blur(.7px) saturate(1.7) hue-rotate(-10deg);
+  transform:translateY(-130px);animation:track 8s linear infinite}
+@keyframes track{0%{transform:translateY(-130px)}55%,100%{transform:translateY(112vh)}}
+.vhs-head{position:fixed;left:0;right:0;bottom:0;height:18px;z-index:83;pointer-events:none;opacity:.75;mix-blend-mode:screen;filter:blur(.6px);
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 24px,transparent 24px 70px,rgba(255,255,255,.28) 70px 150px,transparent 150px 230px,rgba(255,255,255,.4) 230px 250px,transparent 250px 420px);background-size:420px 100%;
+  -webkit-mask:linear-gradient(transparent,#000 70%);mask:linear-gradient(transparent,#000 70%);animation:head .3s steps(6) infinite}
+@keyframes head{to{background-position:-420px 0}}
+.vhs-osd{position:fixed;z-index:84;bottom:28px;pointer-events:none;font:400 28px/1 "VT323",ui-monospace,monospace;letter-spacing:.06em;color:#fff;opacity:.88;text-shadow:2px 0 var(--r),-2px 0 var(--c),0 0 6px rgba(255,255,255,.4)}
+.vhs-osd.a{left:24px;animation:blink 1.6s step-end infinite}
+.vhs-osd.b{right:24px}
+@media (max-width:980px){.vhs-osd{font-size:20px;bottom:22px}.vhs-osd.a{left:14px}.vhs-osd.b{right:14px}}
+@media (prefers-reduced-motion:reduce){.fx.noise,.vhs-track,.vhs-head,.vhs-osd.a{animation:none}.vhs-track{display:none}}
 
-.rv{opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1)}
-.rv.in{opacity:1;transform:none}
-@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.caret,.pipe .now{animation:none}.bar .f{transition:none}}
-</style>
-<style id="edition-bar-style">
-.ed-bar { position: fixed; top: 0; left: 0; right: 0; height: 34px; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 6px;
-  background: #0a080c; border-bottom: 2px solid #e8487f; font: 600 12px/1 "Space Grotesk", system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase;
-  overflow-x: auto; white-space: nowrap; padding: 0 10px; }
-.ed-bar span { color: #8e8496; margin-right: 4px; }
-.ed-bar a { color: #f6eedb; text-decoration: none; padding: 5px 10px; border: 1px solid transparent; }
-.ed-bar a:hover { border-color: #f6eedb; }
-.ed-bar a.on { background: #f8d23c; color: #151116; border-color: #151116; }
-.ed-bar a small { font-size: 10px; opacity: .7; margin-left: 4px; text-transform: none; }
-body { padding-top: 34px !important; }
-nav { top: 34px !important; }
-@media (prefers-reduced-motion: no-preference) { .ed-bar a { transition: background .15s ease-out; } }
+/* ---------- emblem feed, scan section, hazard edge ---------- */
+.holo{flex:1;min-height:320px;display:flex;flex-direction:column}
+.holo.cut{background:linear-gradient(135deg,var(--r),var(--line) 34%,var(--line) 66%,var(--y))}
+.ho-c{position:relative;flex:1;min-height:260px;overflow:hidden;background:
+  repeating-linear-gradient(0deg,rgba(255,0,60,.07) 0 1px,transparent 1px 28px),
+  repeating-linear-gradient(90deg,rgba(255,0,60,.07) 0 1px,transparent 1px 28px),
+  radial-gradient(58% 52% at 50% 44%,rgba(255,0,60,.30),transparent 72%)}
+.ho-c video{position:absolute;inset:4% 0;width:100%;height:92%;object-fit:contain;mix-blend-mode:screen;filter:contrast(1.25) saturate(1.2) drop-shadow(0 0 22px rgba(255,0,60,.55))}
+.ho-c::after{content:"";position:absolute;left:0;right:0;top:-40%;height:36%;pointer-events:none;background:linear-gradient(transparent,rgba(255,0,60,.16),transparent);animation:hsweep 3.4s linear infinite}
+@keyframes hsweep{to{transform:translateY(400%)}}
+.ho-v{position:absolute;left:0;right:0;bottom:14px;text-align:center;color:var(--r);font-size:10px;animation:blink 1.2s step-end infinite}
+.haz{position:absolute!important;left:0;top:0;bottom:0;width:12px;background:repeating-linear-gradient(-45deg,#000 0 9px,transparent 9px 18px)}
+.slab{padding-left:calc(clamp(20px,3vw,44px) + 12px)}
+.scanband{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:clamp(18px,2.6vw,40px);padding:clamp(60px,7.5vw,120px) var(--gut) 0;max-width:1500px;margin:0 auto}
+.sb-t{align-self:center}
+.sb-t .mono{color:var(--r)}
+.sb-t h2{margin-top:12px;font:800 clamp(60px,7.6vw,124px)/.82 var(--disp);text-transform:uppercase}
+.sb-t h2 em{font-style:normal;color:var(--r)}
+.sb-t p{margin-top:20px;max-width:40ch;color:#b9bbc6;text-wrap:pretty}
+.sb-t .acts{padding:0}
+.scanband .scanr{min-height:clamp(380px,46vw,560px)}
+@media (max-width:980px){.scanband{grid-template-columns:1fr}.holo{min-height:340px}}
+@media (prefers-reduced-motion:reduce){.ho-c::after,.ho-v{animation:none}}
+
+/* ---------- full site parts ---------- */
+html{scroll-behavior:smooth}
+[id]{scroll-margin-top:20px}
+.jobs + .jobs{padding-top:0}
+.job + .job,.duo{margin-top:22px}
+.job.alt .j-no{background:var(--c)}
+.pill.wip{color:var(--r);border-color:var(--r)}.pill.wip i{background:var(--r)}
+.meter.cy .seg i.on{background:var(--c)}
+.pipe{grid-column:1/-1;display:flex;align-items:flex-start;border-top:1px solid var(--line);padding:24px clamp(22px,2.6vw,38px)}
+.pn{flex:0 1 168px;min-width:0}
+.pn b{display:block;font:700 17px/1.1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--y)}
+.pn span{display:block;margin-top:5px;font:500 10px/1.5 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.pl{flex:1 1 20px;min-width:14px;height:2px;margin:9px 12px 0;opacity:.8;background:repeating-linear-gradient(90deg,var(--c) 0 6px,transparent 6px 12px);animation:dash .5s linear infinite}
+@keyframes dash{to{background-position:12px 0}}
+.intel{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
+.it{padding:24px clamp(18px,1.8vw,26px) 28px;border-left:1px solid var(--line)}
+.it:first-child{border-left:0}
+.it .mono{color:var(--r)}
+.it h4{margin:10px 0 10px;font:800 32px/.95 var(--disp);text-transform:uppercase;letter-spacing:.01em}
+.it p{font-size:16px;line-height:1.4;color:#b9bbc6;text-wrap:pretty}
+.it p b{color:var(--y);font-weight:600}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.job.sm{grid-template-columns:104px minmax(0,1fr);margin-top:0}
+.job.sm .j-no b{font-size:84px}
+.job.sm h3{font-size:clamp(34px,3.4vw,50px)}
+.job.sm .meter{margin-top:18px}
+.proto{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.pr{padding:28px 28px 32px}
+.pr b{display:block;font:900 110px/.8 var(--disp);color:transparent;-webkit-text-stroke:1.5px var(--y);transition:color .1s steps(2)}
+.pr:hover b{color:var(--y)}
+.pr h3,.gr h3{font:800 40px/.95 var(--disp);text-transform:uppercase;margin:18px 0 12px}
+.pr p{color:#b9bbc6;text-wrap:pretty}
+.gear{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.gr{padding:26px 28px 30px}
+.gr .mono{color:var(--r)}
+.gr h3{margin-top:10px}
+.gr .tech{margin-top:16px}
+.cut.pr,.cut.gr,.cut.b3{transition:background-color .1s steps(2)}
+.cut.pr:hover,.cut.gr:hover,a.cut.b3:hover{background:var(--y)}
+.bg3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:22px}
+.b3{display:block;padding:20px 24px 22px}
+.b3 .mono{color:var(--c)}
+.b3 b{display:block;margin-top:8px;font:700 21px/1.15 var(--ui);letter-spacing:.04em;text-transform:uppercase}
+.b3 p{color:var(--mut);font-size:16px}
+.call-wrap{position:relative;z-index:2;padding:0 var(--gut);max-width:1500px;margin:0 auto}
+.call{padding-bottom:clamp(36px,5vw,64px)}
+.shout{margin-top:clamp(28px,4vw,56px);font:900 21cqw/.8 var(--disp);text-transform:uppercase;letter-spacing:-.01em}
+.shout span{display:block}
+.mail{align-self:flex-start;margin-top:26px;font:700 clamp(19px,3.4cqw,34px)/1.2 var(--ui);letter-spacing:.04em;border-bottom:3px solid #000;overflow-wrap:anywhere;transition:background-color .1s steps(2),color .1s steps(2)}
+.mail:hover{background:#000;color:var(--y)}
+.foot{position:relative;z-index:2;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;padding:26px var(--gut) calc(26px + env(safe-area-inset-bottom));color:var(--mut);max-width:1500px;margin:0 auto}
+.js .rv{opacity:0;transform:translateY(18px);transition:opacity .4s var(--snap),transform .4s var(--snap)}
+.js .rv.in{opacity:1;transform:none}
+@media (max-width:1240px){.intel{grid-template-columns:1fr 1fr}.it:nth-child(3){border-left:0}.it:nth-child(n+3){border-top:1px solid var(--line)}}
+@media (max-width:980px){
+  .pipe{flex-direction:column}
+  .pn{flex:none}
+  .pl{flex:none;width:2px;min-width:0;height:22px;margin:8px 0 8px 4px;background:repeating-linear-gradient(0deg,var(--c) 0 6px,transparent 6px 12px);animation:none}
+  .duo,.proto,.gear,.bg3{grid-template-columns:1fr}
+  .job.sm{grid-template-columns:1fr}
+  .shout{font-size:25cqw}
+}
+@media (max-width:620px){.intel{grid-template-columns:1fr}.it{border-left:0}.it:nth-child(n+2){border-top:1px solid var(--line)}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.js .rv{opacity:1;transform:none;transition:none}.pl{animation:none}}
+
+@media (max-width:980px){
+  .hero{grid-template-columns:1fr;min-height:0}
+  .slab{clip-path:polygon(0 0,calc(100% - 110px) 0,calc(100% - 92px) 18px,100% 18px,100% calc(100% - 44px),calc(100% - 44px) 100%,0 100%);min-height:74svh}
+  .s-top{padding-right:96px;flex-direction:column}
+  .name{font-size:33cqw}
+  .acts,.s-foot{padding-right:0}
+  .s-foot{padding-right:44px}
+  .scanr{min-height:380px}
+  .job{grid-template-columns:1fr}
+  .j-no{flex-direction:row;align-items:flex-end;margin:1px 1px 0 1px;padding:14px 18px}
+  .j-no b{font-size:72px}
+  .j-side{border-left:0;border-top:1px solid var(--line)}
+  .j-head i{display:none}
+}
+@media (max-width:520px){.chips{grid-template-columns:1fr 1fr}.chip:last-child{grid-column:1/-1}.btn{padding:14px 20px 13px 18px;font-size:15px}}
+@media (prefers-reduced-motion:reduce){
+  .tape div,.pill i,.stat .live::before{animation:none}
+  .name.g span::before,.name.g span::after{animation:none;opacity:0}
+  #boot{display:none}
+}
 </style>
 </head>
 <body>
-<div class="ed-bar" role="navigation" aria-label="Portfolio themes"><span>Theme</span><a href="index.html" class="on" aria-current="page">Terminal<small>(main)</small></a><a href="kaiju-edition.html">Kaiju</a><a href="game-edition.html">Game</a><a href="clean-edition.html">Clean</a></div>
+<div class="grid-bg" aria-hidden="true"></div>
 
-<nav><div class="wrap">
-  <span class="prompt"><b>ankush@ai</b>:<i>~/portfolio</i>$<span class="caret"></span></span>
-  <ul><li><a href="#lab">lab</a></li><li><a href="#work">experiments</a></li><li><a href="#method">method</a></li><li><a href="#skills">skills</a></li><li><a href="#contact">contact</a></li></ul>
-  <a class="dl" href="resume.pdf" download>resume.pdf ↓</a>
-</div></nav>
+<div id="boot" aria-hidden="true">
+  <div class="bp"></div>
+  <div class="bl"></div>
+  <div class="bt"><span class="bm">AM//</span><b data-t="Measured before trusted">Measured before trusted</b></div>
+</div>
+<div class="gbars" id="gbars" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="vhs-track" aria-hidden="true"></div>
+<div class="vhs-head" aria-hidden="true"></div>
+<div class="vhs-osd a" aria-hidden="true">&#9654; PLAY</div>
+<div class="vhs-osd b" id="vhs-t" aria-hidden="true">SP 0:00:00</div>
 
-<header class="hero" id="lab"><div class="wrap">
-  <div class="hello"><span>●</span> open to AI Trainer and data annotation roles · remote or relocate · Mukerian, India</div>
-  <h1>Ankush Manhas<br><span class="s">checks AI answers</span> <em class="s">against the truth.</em></h1>
-  <span class="rot">AI Trainer and Data Annotator who <b id="rot">checks every answer.</b></span>
+<header class="top">
+  <a class="logo" href="#top" aria-label="Ankush Manhas, home">AM//</a>
+  <nav aria-label="Sections">
+    <a href="#jobs"><sup>01</sup>Jobs</a>
+    <a href="#method"><sup>02</sup>Method</a>
+    <a href="#loadout"><sup>03</sup>Loadout</a>
+    <a href="#contact"><sup>04</sup>Contact</a>
+  </nav>
+  <div class="stat mono">
+    <span class="live">Open to work</span>
+    <span>Punjab, IN <b>31.95N 75.62E</b></span>
+    <span>Local <b id="clock">00:00:00</b></span>
+  </div>
+</header>
 
-  <div class="lab rv in">
-    <div class="labbar">
-      <div class="dots"><i></i><i></i><i></i></div>
-      <span>live demo · card transactions over time</span>
-      <div class="switch" role="group" aria-label="How to split the data">
-        <button id="bRand" type="button">random split</button>
-        <button id="bTime" type="button" class="on good">time split</button>
-      </div>
+<main id="top">
+<section class="hero">
+  <div class="slab">
+    <div class="s-top">
+      <span class="tag"><i></i>Available for hire</span>
+      <span class="mono">File 001 // Class: Engineer // Rev 2026</span>
     </div>
-    <canvas id="cv" aria-label="Animated stream of transactions, split into training and test data"></canvas>
-    <div class="readout">
-      <div><small>transactions</small><b id="rN">0</b></div>
-      <div><small>frauds seen</small><b id="rF" style="color:var(--fraud)">0</b></div>
-      <div class="leak good" id="leakBox"><small>future rows in training</small><b id="rL">0%</b></div>
-      <div><small>legend</small><div class="legend mono" style="font-size:12px;margin-top:4px"><span style="--c:var(--train)">train</span><span style="--c:var(--test)">test</span><span style="--c:var(--fraud)">fraud</span></div></div>
+    <div class="hex mono" id="hex" aria-hidden="true"></div>
+    <i class="haz" aria-hidden="true"></i>
+    <h1 class="name" id="name" aria-label="Ankush Manhas"><span data-t="Ankush" aria-hidden="true">Ankush</span><span data-t="Manhas" aria-hidden="true">Manhas</span></h1>
+    <p class="role">AI and Machine Learning Engineer</p>
+    <p class="pitch">I build machine learning systems that are measured before they are trusted. Real-time fraud detection, and agents that read annual reports and show their source page.</p>
+    <div class="acts">
+      <a class="btn blk" href="#jobs">Open jobs <span class="k">[01]</span></a>
+      <a class="btn out" href="https://github.com/Ankush-Manhas840" target="_blank" rel="noopener">GitHub <span class="k">[02]</span></a>
+      <a class="btn out" href="resume.pdf" target="_blank" rel="noopener">Resume <span class="k">[03]</span></a>
     </div>
-    <div class="labnote" id="note"></div>
+    <div class="s-foot">
+      <div class="code" aria-hidden="true"></div>
+      <div class="mono">Python / LangGraph / FastAPI<br>Kafka / Redis / Docker / AWS</div>
+    </div>
   </div>
 
-  <div class="cta">
-    <a class="btn main" href="#work">See the experiments ↓</a>
-    <a class="btn" href="resume.pdf" download>Download resume</a>
-    <a class="btn" href="https://github.com/Ankush-Manhas840" target="_blank" rel="noopener">GitHub</a>
+  <div class="col">
+    <div class="holo cut" aria-hidden="true">
+      <div class="sc-h mono"><span>Feed 01 // emblem</span><span>Loop <b id="em-t">00.0</b></span></div>
+      <div class="ho-c">
+        <video id="emblem" muted loop playsinline autoplay preload="auto" src="media/emblem.mp4"></video>
+        <i class="brk a"></i><i class="brk b"></i><i class="brk c"></i><i class="brk d"></i>
+        <span class="ho-v mono">Signal locked</span>
+      </div>
+      <div class="sc-f mono"><span>Channel // night band</span><span>Gain <b>+12</b></span></div>
+    </div>
+    <div class="chips">
+      <div class="chip cut"><b>24.4<small>M</small></b><span>Transactions scored</span></div>
+      <div class="chip cut"><b>199<small>/1K</small></b><span>Top alerts were real fraud</span></div>
+      <div class="chip cut"><b>180<small>K</small></b><span>Live replay purchases</span></div>
+    </div>
   </div>
-</div></header>
+</section>
 
-<section id="work"><div class="wrap">
-  <div class="head rv"><span class="big">01</span><div><h2>Experiment log</h2><p>Three finished projects and one in progress. Each one has a moment where the easy number was wrong, and that is the part worth reading.</p></div></div>
+<div class="tape" aria-hidden="true">
+  <div>
+    <span>Open to work</span><span>Happy to relocate</span><span>Real-time fraud detection</span><span>Retrieval agents</span><span>Measured before trusted</span>
+    <span>Open to work</span><span>Happy to relocate</span><span>Real-time fraud detection</span><span>Retrieval agents</span><span>Measured before trusted</span>
+  </div>
+</div>
 
-  <article class="exp hot rv">
-    <div class="exph"><span>EXP-03 · fraud-detection-realtime</span><span class="st" style="--c:var(--ok)"><i></i>live · deployed Oct 2026</span></div>
-    <div class="expb">
-      <div>
-        <h3>Real-Time Fraud Detection</h3>
-        <p class="d">24.4 million card transactions from 2,000 people, about 12 frauds in every 10,000 (IBM TabFormer). The hard part is not the model. It is keeping the future out of the training data.</p>
-        <div class="tags"><span>python</span><span>pandas</span><span>scikit-learn</span><span>xgboost</span><span>fastapi</span><span>kafka</span><span>redis</span><span>docker</span><span>streamlit</span><span>evidently</span><span>github actions</span></div>
-        <ul class="log">
-          <li class="x"><b>Threw out the first dataset</b>PaySim's balance columns were never updated for fraud rows, so they gave the answer away.</li>
-          <li class="y"><b>Split by time, not at random</b>Training ends April 2017. The model is always judged on the future.</li>
-          <li class="x"><b>A strong feature made it worse</b>Online fraud fell from 66 to 0 per 10,000 after 2017. Drift, confirmed on a second group. Feature removed.</li>
-          <li class="y"><b>Features beat complexity</b>Per-card history ("is this the card's usual hour?") lifted unseen-people alerts from 142 to 177 frauds. XGBoost reached 135, so the simple model stayed.</li>
-          <li class="y"><b>Served as an API</b>FastAPI /predict with Pydantic validation and pytest checks, flagging about 1,000 alerts per 600,000 purchases.</li>
-          <li class="y"><b>Real-time pipeline</b>Payments stream through Kafka; each card's history lives in Redis; every payment is scored in about 10 ms. Live features match training features 100%, checked by a test on every push.</li>
-          <li class="x"><b>A bug worth learning from</b>Replaying the same payments twice corrupted card memory and hid real frauds (0.987 fell to 0.929). Fixed with clean replays and fresh consumer groups: idempotency in practice.</li>
-          <li class="y"><b>Live online</b>Aiven Kafka, Redis Cloud and Streamlit Cloud. Watch payments get scored, or build your own purchase and see the model react. Monitored with SQLite and an Evidently drift report; CI on GitHub Actions.</li>
-        </ul>
+<section class="scanband" id="scanband">
+  <div class="sb-t rv">
+    <span class="mono">Live scan // 00</span>
+    <h2>Find the <em>fraud</em></h2>
+    <p>Every dot is a payment. The red ones are what my model flags, and the yellow box locks onto each one and reads out its score. Move your mouse to turn the network.</p>
+    <div class="acts"><a class="btn yl" href="https://fraud-check.streamlit.app" target="_blank" rel="noopener">Open the real one</a></div>
+  </div>
+  <div class="scanr cut rv">
+    <div class="sc-h mono"><span>Scan // payment network</span><span>Nodes <b id="n-nodes">0</b></span></div>
+    <div class="sc-c">
+      <canvas id="scan" role="img" aria-label="A rotating web of payment dots. A targeting box locks onto the ones the model marked as fraud."></canvas>
+      <i class="brk a"></i><i class="brk b"></i><i class="brk c"></i><i class="brk d"></i>
+    </div>
+    <div class="sc-f mono"><span>Model // logistic, class balanced</span><span>Threat <b id="n-thr">0.00</b></span></div>
+  </div>
+</section>
+
+<section class="jobs" id="jobs">
+  <div class="j-head">
+    <h2>Selected <em>jobs</em></h2>
+    <i></i>
+    <span class="mono">04 files on record</span>
+  </div>
+
+  <article class="job cut rv">
+    <div class="j-no"><b>01</b><span class="mono">Job file<br>Fraud // RT</span></div>
+    <div class="j-main">
+      <span class="pill"><i></i>Status: live</span>
+      <h3>Real-time fraud detection</h3>
+      <p>Purchases stream in through Kafka. A consumer rebuilds each card's history from Redis, builds 9 features, and asks a FastAPI service for a score. It runs in the cloud and scores one purchase every second.</p>
+      <div class="tech"><span>Python</span><span>scikit-learn</span><span>FastAPI</span><span>Kafka</span><span>Redis</span><span>Docker</span></div>
+      <div class="acts">
+        <a class="btn yl" href="https://fraud-check.streamlit.app" target="_blank" rel="noopener">Launch demo</a>
+        <a class="btn ln" href="https://github.com/Ankush-Manhas840/fraud-detection-realtime" target="_blank" rel="noopener">Read code</a>
       </div>
-      <div>
-        <div class="chart">
-          <div class="k">real frauds in the top 1,000 alerts</div>
-          <div class="big-n" style="margin-bottom:14px"><span data-count="177">0</span> <small>on 253 unseen people, vs about 1 for random</small></div>
-          <div class="bar"><span class="l">random</span><span class="t"><span class="f" data-w="0.6"></span></span><span class="v">~1</span></div>
-          <div class="bar"><span class="l">xgboost</span><span class="t"><span class="f b" data-w="76.3"></span></span><span class="v">135</span></div>
-          <div class="bar"><span class="l">first model</span><span class="t"><span class="f b" data-w="80.2"></span></span><span class="v">142</span></div>
-          <div class="bar"><span class="l">final model</span><span class="t"><span class="f g" data-w="100"></span></span><span class="v">177</span></div>
-        </div>
-        <div class="chart">
-          <div class="k">drift caught · online fraud per 10,000</div>
-          <div class="bar"><span class="l">before Apr 2017</span><span class="t"><span class="f r" data-w="100"></span></span><span class="v">66.4</span></div>
-          <div class="bar"><span class="l">after Apr 2017</span><span class="t"><span class="f" data-w="0.7"></span></span><span class="v">0.0</span></div>
-        </div>
-        <div class="chart">
-          <div class="k">build complete</div>
-          <div class="pipe"><span class="done">data + EDA ✓</span><span class="done">models ✓</span><span class="done">fastapi ✓</span><span class="done">kafka ✓</span><span class="done">redis ✓</span><span class="done">docker ✓</span><span class="done">monitoring ✓</span><span class="done">live ✓</span></div>
-        </div>
-        <div class="links">
-          <a class="btn main" href="https://fraud-check.streamlit.app/" target="_blank" rel="noopener">Try the live demo</a>
-          <a class="btn" href="https://github.com/Ankush-Manhas840/fraud-detection-realtime" target="_blank" rel="noopener">Code and write-up</a>
-        </div>
-      </div>
+    </div>
+    <div class="j-side">
+      <div class="meter"><div class="l"><span>This model</span><b>199 / 1,000</b></div><div class="seg" data-on="20"></div></div>
+      <div class="meter"><div class="l"><span>253 unseen people</span><b>177 / 1,000</b></div><div class="seg" data-on="18"></div></div>
+      <div class="meter red"><div class="l"><span>Random guessing</span><b>about 1</b></div><div class="seg" data-on="0"></div></div>
+      <p class="mono">Real frauds inside the 1,000 purchases the model was most worried about.</p>
+    </div>
+
+    <div class="pipe" aria-label="How a purchase moves through the system">
+      <div class="pn"><b>Purchase</b><span>one swipe or online order</span></div><i class="pl" aria-hidden="true"></i>
+      <div class="pn"><b>Kafka</b><span>carries the stream</span></div><i class="pl" aria-hidden="true"></i>
+      <div class="pn"><b>Consumer + Redis</b><span>card history, 9 features</span></div><i class="pl" aria-hidden="true"></i>
+      <div class="pn"><b>FastAPI</b><span>checks input, returns score</span></div><i class="pl" aria-hidden="true"></i>
+      <div class="pn"><b>Dashboard</b><span>alert and the reason</span></div>
+    </div>
+
+    <div class="intel">
+      <div class="it"><span class="mono">Intel 01</span><h4>Cut a strong feature</h4><p>Adding "was the chip used" dropped real frauds in the top 1,000 alerts from <b>150 to 17</b>. Online fraud fell from <b>66.4 to 0.0</b> per 10,000 after April 2017. The pattern changed, so the feature went.</p></div>
+      <div class="it"><span class="mono">Intel 02</span><h4>Caught a leaking dataset</h4><p>In PaySim, fraud rows were cancelled, so the receiver's balance never changed: <b>49.8%</b> against <b>0.06%</b> for normal payments. I switched to IBM TabFormer, <b>24.4 million</b> rows.</p></div>
+      <div class="it"><span class="mono">Intel 03</span><h4>Live matches training</h4><p>Replaying one card's <b>5,011</b> purchases through the live Redis code gave the training features back. A live replay then caught <b>33 of 78</b> frauds, matching the offline result.</p></div>
+      <div class="it"><span class="mono">Intel 04</span><h4>Fixed real failures</h4><p>The machine ran out of network ports, and a purchase replayed twice dropped a caught fraud from <b>0.987 to 0.929</b>. Both fixed, the second by making replays safe to repeat.</p></div>
     </div>
   </article>
 
-  <article class="exp rv">
-    <div class="exph"><span>EXP-04 · finsight</span><span class="st" style="--c:var(--test)"><i></i>in progress · Nov–Dec 2026</span></div>
-    <div class="expb">
-      <div>
-        <h3>FinSight: Annual Report Analyst</h3>
-        <p class="d">Ask about Indian listed companies in plain English ("Compare Maruti and M&amp;M profit margins FY23–FY25") and get answers from their annual reports, with page citations and numbers worked out by code, not guessed by the language model.</p>
-        <div class="tags"><span>langchain</span><span>langgraph</span><span>rag</span><span>gemini</span><span>qdrant</span><span>bm25</span><span>reranker</span><span>ragas</span><span>fastapi</span><span>streamlit</span></div>
-        <ul class="log">
-          <li class="z"><b>Answer key before improvements</b>A hand-verified key of 24 financial metrics (revenue, margin, D/E, ROE, EPS), each tied to its source PDF page. No answer is accepted without a citation.</li>
-          <li class="z"><b>Four versions, measured</b>Naive RAG, then table-aware parsing, then hybrid search with a reranker, then an agent with a calculator and number verification.</li>
-          <li class="z"><b>Annotation guidelines</b>Written for PDF failure modes: ₹ mis-decoding, ₹ million vs ₹ crore, Indian digit grouping. Query expansion ("PAT" → "profit after tax") scored 0.55 vs 0.08, beating a larger embedding model (0.35).</li>
-        </ul>
+  <article class="job cut alt rv">
+    <div class="j-no"><b>02</b><span class="mono">Job file<br>Agent // RAG</span></div>
+    <div class="j-main">
+      <span class="pill wip"><i></i>Status: in progress</span>
+      <h3>FinSight report analyst</h3>
+      <p>An agent that answers questions about 250 to 300 page Indian annual reports (Maruti, Mahindra, Bajaj). It points to the page it read and does the arithmetic in code, so the model never guesses a number. Every version is tested against 24 values I checked by hand.</p>
+      <div class="tech"><span>Python</span><span>LangChain</span><span>LangGraph</span><span>Gemini</span><span>sentence-transformers</span><span>FastAPI</span></div>
+      <div class="acts">
+        <a class="btn ln" href="https://github.com/Ankush-Manhas840/finsight" target="_blank" rel="noopener">Follow the build</a>
       </div>
-      <div>
-        <div class="chart">
-          <div class="k">build plan</div>
-          <div class="pipe"><span class="now">llm + data</span><span>first rag</span><span>evals</span><span>better retrieval</span><span>agent</span><span>verification</span><span>api + ui</span><span>live</span></div>
-        </div>
-        <div class="chart">
-          <div class="k">results table · filled in as each version ships</div>
-          <div class="bar"><span class="l">v1 naive rag</span><span class="t"><span class="f" data-w="0"></span></span><span class="v">—</span></div>
-          <div class="bar"><span class="l">v2 tables</span><span class="t"><span class="f" data-w="0"></span></span><span class="v">—</span></div>
-          <div class="bar"><span class="l">v3 hybrid</span><span class="t"><span class="f" data-w="0"></span></span><span class="v">—</span></div>
-          <div class="bar"><span class="l">v4 agent</span><span class="t"><span class="f" data-w="0"></span></span><span class="v">—</span></div>
-        </div>
-        <div class="links">
-          <a class="btn" href="https://github.com/Ankush-Manhas840/finsight" target="_blank" rel="noopener">Follow the build</a>
-        </div>
-      </div>
+    </div>
+    <div class="j-side">
+      <div class="meter red"><div class="l"><span>"PAT" as typed, right line</span><b>0.08</b></div><div class="seg" data-on="2"></div></div>
+      <div class="meter red"><div class="l"><span>"PAT" as typed, cricket line</span><b>0.27</b></div><div class="seg" data-on="5"></div></div>
+      <div class="meter cy"><div class="l"><span>Spelled out, right line</span><b>0.55</b></div><div class="seg" data-on="11"></div></div>
+      <div class="meter"><div class="l"><span>Spelled out, cricket line</span><b>0.17</b></div><div class="seg" data-on="3"></div></div>
+      <p class="mono">How well a search matched. Writing "profit after tax" fixed the ranking with the smallest model.</p>
     </div>
   </article>
 
-  <article class="exp rv">
-    <div class="exph"><span>EXP-01 · crop-yield-prediction</span><span class="st" style="--c:var(--ok)"><i></i>deployed</span></div>
-    <div class="expb">
-      <div>
-        <h3>Crop Yield Prediction</h3>
-        <p class="d">Yield for rice, wheat, maize and sugarcane from 246,091 rows of Indian government data, later updated to the official 1997–2022 series.</p>
-        <div class="tags"><span>scikit-learn</span><span>pandas</span><span>streamlit</span></div>
-        <ul class="log">
-          <li class="x"><b>Caught a silent unit bug</b>A 175× jump from median to third quartile: some crops were recorded in nuts or bales, not tonnes.</li>
-          <li class="y"><b>Found where the error lived</b>One crop gave 65.15 error against 0.55 for the rest. Impossible rows removed, error down 83%.</li>
-        </ul>
-      </div>
-      <div>
-        <div class="chart">
-          <div class="k">test error (MAE, t/ha) · lower is better</div>
-          <div class="big-n" style="margin-bottom:14px">−<span data-count="98">0</span>% <small>against the linear baseline</small></div>
-          <div class="bar"><span class="l">linear baseline</span><span class="t"><span class="f" data-w="100"></span></span><span class="v">107.63</span></div>
-          <div class="bar"><span class="l">random forest</span><span class="t"><span class="f b" data-w="11"></span></span><span class="v">11.91</span></div>
-          <div class="bar"><span class="l">outliers removed</span><span class="t"><span class="f g" data-w="2"></span></span><span class="v">2.04</span></div>
-        </div>
-        <div class="links">
-          <a class="btn" href="https://crop-yield-prediction-wpnuufdz2fc9tmbm4k8t3y.streamlit.app/" target="_blank" rel="noopener">Live demo ↗</a>
-          <a class="btn" href="https://github.com/Ankush-Manhas840/crop-yield-prediction" target="_blank" rel="noopener">Code</a>
+  <div class="duo">
+    <article class="job sm cut rv">
+      <div class="j-no"><b>03</b></div>
+      <div class="j-main">
+        <span class="pill"><i></i>Status: live</span>
+        <h3>Crop yield prediction</h3>
+        <p>Predicts yield for 4 Indian crops from 246,091 government rows. The data mixed units with no unit column, and a few impossible rows caused most of the error.</p>
+        <div class="meter red"><div class="l"><span>Average error, first model</span><b>107.63</b></div><div class="seg" data-on="20"></div></div>
+        <div class="meter cy"><div class="l"><span>Average error, after cleaning</span><b>2.04</b></div><div class="seg" data-on="1"></div></div>
+        <div class="acts">
+          <a class="btn yl" href="https://crop-yield-prediction-wpnuufdz2fc9tmbm4k8t3y.streamlit.app/" target="_blank" rel="noopener">Launch demo</a>
+          <a class="btn ln" href="https://github.com/Ankush-Manhas840/crop-yield-prediction" target="_blank" rel="noopener">Code</a>
         </div>
       </div>
+    </article>
+    <article class="job sm cut rv">
+      <div class="j-no"><b>04</b></div>
+      <div class="j-main">
+        <span class="pill"><i></i>Status: live</span>
+        <h3>Used car price prediction</h3>
+        <p>A random forest on about 15,400 listings, off by ₹0.92 lakh on average. Sorting the errors showed one ₹3.95 crore listing dragging everything down.</p>
+        <div class="meter red"><div class="l"><span>Fit before cleaning</span><b>0.72</b></div><div class="seg" data-on="14"></div></div>
+        <div class="meter cy"><div class="l"><span>Fit after removing 9 cars</span><b>0.94</b></div><div class="seg" data-on="19"></div></div>
+        <div class="acts">
+          <a class="btn yl" href="https://usedcarchecker.streamlit.app" target="_blank" rel="noopener">Launch demo</a>
+          <a class="btn ln" href="https://github.com/Ankush-Manhas840/used-car-price-predictor" target="_blank" rel="noopener">Code</a>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<div class="band" id="band" aria-hidden="true">
+  <div>Measured <b>before</b> trusted // Measured <b>before</b> trusted // Measured <b>before</b> trusted //</div>
+  <div>Build // <b>Check</b> // Ship // Build // <b>Check</b> // Ship // Build // <b>Check</b> // Ship // Build // <b>Check</b> // Ship //</div>
+</div>
+
+<section class="jobs" id="method">
+  <div class="j-head rv">
+    <h2>Field <em>method</em></h2>
+    <i></i>
+    <span class="mono">03 rules</span>
+  </div>
+  <div class="proto">
+    <div class="pr cut rv"><b>01</b><h3>Measure first</h3><p>Before I believe a model, I write down what a good result looks like and build the test for it. For FinSight that was 24 answers checked by hand against the printed page.</p></div>
+    <div class="pr cut rv"><b>02</b><h3>Remove what hurts</h3><p>If the evidence says a feature or a dataset is making things worse, it goes, even when it looked strong. I confirm it on a second group of people before deciding.</p></div>
+    <div class="pr cut rv"><b>03</b><h3>Run it for real</h3><p>A notebook score is not a system. I put it in a container, deploy it, replay real traffic through it, and check the live numbers match the offline ones.</p></div>
+  </div>
+</section>
+
+<section class="jobs" id="loadout">
+  <div class="j-head rv">
+    <h2>Load<em>out</em></h2>
+    <i></i>
+    <span class="mono">04 slots</span>
+  </div>
+  <div class="gear">
+    <div class="gr cut rv"><span class="mono">Slot 01</span><h3>Language models and agents</h3><div class="tech"><span>Retrieval augmented generation</span><span>LangChain</span><span>LangGraph</span><span>Gemini API</span><span>Structured JSON output</span><span>Prompt design</span><span>Embeddings</span><span>Query expansion</span><span>Ground truth testing</span></div></div>
+    <div class="gr cut rv"><span class="mono">Slot 02</span><h3>Python and machine learning</h3><div class="tech"><span>pandas</span><span>NumPy</span><span>scikit-learn</span><span>XGBoost</span><span>Logistic regression</span><span>Precision and recall</span><span>Time-based validation</span><span>Leakage detection</span><span>Feature engineering</span><span>Drift analysis</span></div></div>
+    <div class="gr cut rv"><span class="mono">Slot 03</span><h3>Backend and cloud</h3><div class="tech"><span>FastAPI and Pydantic</span><span>Docker</span><span>Docker Compose</span><span>Apache Kafka</span><span>Redis</span><span>Streamlit</span><span>AWS EC2, S3, ECR</span><span>GitHub Actions</span><span>Git</span><span>Linux</span></div></div>
+    <div class="gr cut rv"><span class="mono">Slot 04</span><h3>Data</h3><div class="tech"><span>SQL joins</span><span>Window functions</span><span>SQLite</span><span>Parquet</span><span>Files larger than memory</span><span>PDF text extraction</span></div></div>
+  </div>
+  <div class="bg3">
+    <div class="b3 cut rv"><span class="mono">Education</span><b>B.Tech, Computer Science</b><p>Chandigarh University, 2026</p></div>
+    <a class="b3 cut rv" href="https://github.com/Ankush-Manhas840/Practice" target="_blank" rel="noopener"><span class="mono">Every day</span><b>Data structures and algorithms</b><p>Daily practice in Python, all public.</p></a>
+    <a class="b3 cut rv" href="https://github.com/Ankush-Manhas840/system-design" target="_blank" rel="noopener"><span class="mono">Notes</span><b>System design</b><p>My written notes, kept in the open.</p></a>
+  </div>
+</section>
+</main>
+
+<section class="call-wrap" id="contact">
+  <div class="slab call rv">
+    <div class="s-top"><span class="tag"><i></i>Channel open</span><span class="mono">File 004 // Contact // Reply within a day</span></div>
+    <h2 class="shout"><span>Open a</span><span>channel</span></h2>
+    <a class="mail" href="mailto:ankushmanhas10736@gmail.com">ankushmanhas10736@gmail.com</a>
+    <div class="acts">
+      <a class="btn blk" href="resume.pdf" target="_blank" rel="noopener">Download resume</a>
+      <a class="btn out" href="https://linkedin.com/in/ankush-manhas840" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn out" href="https://github.com/Ankush-Manhas840" target="_blank" rel="noopener">GitHub</a>
     </div>
-  </article>
-
-  <article class="exp rv">
-    <div class="exph"><span>EXP-02 · used-car-price-predictor</span><span class="st" style="--c:var(--ok)"><i></i>deployed</span></div>
-    <div class="expb">
-      <div>
-        <h3>Used Car Price Prediction</h3>
-        <p class="d">Resale price for everyday cars from about 15,400 CarDekho listings, checked with 5-fold cross-validation (0.90 to 0.95 on every fold).</p>
-        <div class="tags"><span>scikit-learn</span><span>pandas</span></div>
-        <ul class="log">
-          <li class="x"><b>One car broke the model</b>Ranking the biggest errors found one ₹3.95 crore supercar, the only one of its brand.</li>
-          <li class="y"><b>Scoped to everyday cars</b>Removed brands with fewer than 10 listings (9 of 15,407 cars). R² went from 0.72 to 0.94.</li>
-        </ul>
-      </div>
-      <div>
-        <div class="chart">
-          <div class="k">test R² · higher is better</div>
-          <div class="big-n" style="margin-bottom:14px">0.94 <small>on held-out cars</small></div>
-          <div class="bar"><span class="l">forest, all cars</span><span class="t"><span class="f" data-w="72"></span></span><span class="v">0.72</span></div>
-          <div class="bar"><span class="l">linear baseline</span><span class="t"><span class="f b" data-w="79"></span></span><span class="v">0.79</span></div>
-          <div class="bar"><span class="l">everyday cars</span><span class="t"><span class="f g" data-w="94"></span></span><span class="v">0.94</span></div>
-        </div>
-        <div class="links">
-          <a class="btn" href="https://usedcarchecker.streamlit.app/" target="_blank" rel="noopener">Live demo ↗</a>
-          <a class="btn" href="https://github.com/Ankush-Manhas840/used-car-price-predictor" target="_blank" rel="noopener">Code</a>
-        </div>
-      </div>
-    </div>
-  </article>
-</div></section>
-
-<section id="method"><div class="wrap">
-  <div class="head rv"><span class="big">02</span><div><h2>How I work, <em class="s">as code</em></h2><p>The same checks run through every project above.</p></div></div>
-  <div class="code rv">
-    <div class="exph"><span>method.py</span><span>4 rules</span></div>
-<pre><span class="kw">def</span> <span class="fn">train_a_model</span>(data):
-    baseline = <span class="fn">simple_model</span>(data)        <span class="cm"># 1. a weak model sets the bar</span>
-    <span class="kw">assert</span> train.time.<span class="fn">max</span>() &lt; test.time.<span class="fn">min</span>()  <span class="cm"># 2. no future in training</span>
-    <span class="kw">for</span> group <span class="kw">in</span> [<span class="st2">"crop"</span>, <span class="st2">"brand"</span>, <span class="st2">"period"</span>]:
-        <span class="fn">error_by</span>(group)                 <span class="cm"># 3. the average hides where it is wrong</span>
-    <span class="kw">if</span> score <span class="kw">looks</span> <span class="st2">"too good"</span>:
-        <span class="kw">raise</span> Suspicion                  <span class="cm"># doubt it before celebrating</span>
-    <span class="fn">write_down</span>(what_ran, on_what_data, limits)  <span class="cm"># 4. so anyone can repeat it</span></pre>
   </div>
-</div></section>
+</section>
+<footer class="foot mono"><span>Ankush Manhas // Punjab, India</span><span>End of file</span></footer>
 
-<section id="skills"><div class="wrap">
-  <div class="head rv"><span class="big">03</span><div><h2>Toolkit</h2><p>Evaluating AI answers and checking data, with Python underneath. Green ones are what I use most.</p></div></div>
-  <div class="sk">
-    <div class="skc rv"><h4>ai evaluation</h4><div class="chips"><span class="k">response quality</span><span class="k">ground-truth benchmarks</span><span class="k">instruction following</span><span>factual accuracy</span><span>annotation guidelines</span><span>data labeling</span><span>human-in-the-loop review</span><span>error analysis</span></div></div>
-    <div class="skc rv"><h4>ai assistants</h4><div class="chips"><span class="k">chatgpt</span><span class="k">gemini</span><span class="k">claude</span><span>perplexity</span><span>prompt engineering</span><span>multi-turn conversations</span><span>json output</span></div></div>
-    <div class="skc rv"><h4>machine learning</h4><div class="chips"><span class="k">time-based validation</span><span class="k">leakage checks</span><span class="k">cross-validation</span><span>logistic regression</span><span>random forests</span><span>xgboost</span><span>class imbalance</span><span>PR-AUC</span><span>error analysis</span><span>drift analysis</span></div></div>
-    <div class="skc rv"><h4>data</h4><div class="chips"><span class="k">python</span><span class="k">pandas</span><span>numpy</span><span>data cleaning</span><span>data-quality checks</span><span>large files in chunks</span><span>parquet</span><span>sql</span></div></div>
-    <div class="skc rv"><h4>production</h4><div class="chips"><span class="k">fastapi</span><span class="k">docker</span><span>kafka</span><span>redis</span><span>pydantic</span><span>pytest</span><span>github actions</span><span>evidently</span><span>sqlite</span><span>cloud deployment</span></div></div>
-    <div class="skc rv"><h4>tools</h4><div class="chips"><span class="k">scikit-learn</span><span>git</span><span>jupyter</span><span>streamlit</span><span>linux</span><span>matplotlib</span><span>java</span></div></div>
-  </div>
-  <div class="edu rv"><div><b>B.Tech, Computer Science</b><p>Chandigarh University · May 2026 · CGPA 7.2 / 10</p><p>Mastering Model Mechanics (AI Agent Evaluation) — Mercor, 2026 · Introduction to AI — IBM, 2025 · Computer Vision Specialization — CU Boulder, 2026</p><p>English, Hindi, Punjabi</p></div><a class="btn" href="https://github.com/Ankush-Manhas840/Practice" target="_blank" rel="noopener">Daily algorithms practice →</a></div>
-</div></section>
-
-<section class="end" id="contact"><div class="wrap rv">
-  <h2>Need AI answers checked?<br><em class="s">Let's talk.</em></h2>
-  <p>Based in Mukerian, Punjab, India. Open to remote work and to relocation.</p>
-  <div class="cta">
-    <a class="btn main" href="mailto:ankushmanhas10736@gmail.com">Email me</a>
-    <a class="btn" href="resume.pdf" download>Resume</a>
-    <a class="btn" href="https://linkedin.com/in/ankush-manhas840" target="_blank" rel="noopener">LinkedIn</a>
-    <a class="btn" href="https://github.com/Ankush-Manhas840" target="_blank" rel="noopener">GitHub</a>
-  </div>
-</div></section>
-
-<footer>© 2026 Ankush Manhas · <a href="kaiju-edition.html">kaiju edition</a> · <a href="game-edition.html">game edition</a></footer>
+<div class="fx vig" aria-hidden="true"></div>
+<div class="fx noise" aria-hidden="true"></div>
+<div class="fx scan" aria-hidden="true"></div>
+<div id="cur" aria-hidden="true"></div><div id="cur-dot" aria-hidden="true"></div>
 
 <script>
-const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+document.documentElement.classList.add('js');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* rotating line */
-const words=["checks every answer.","builds the answer key first.","finds label leakage.","catches drift.","writes it all down."];
-const rot=document.getElementById('rot');let wi=0;
-if(!reduce)setInterval(()=>{wi=(wi+1)%words.length;let s=words[wi],i=0;rot.textContent='';
-  const t=setInterval(()=>{rot.textContent=s.slice(0,++i);if(i>=s.length)clearInterval(t)},38)},2600);
+/* segments */
+document.querySelectorAll('.seg').forEach((s) => {
+  const on = +s.dataset.on;
+  for (let i = 0; i < 20; i++) { const e = document.createElement('i'); if (i < on) e.className = 'on'; s.appendChild(e); }
+});
 
-/* split lab */
-const cv=document.getElementById('cv'),cx=cv.getContext('2d');
-let W,H,dpr;
-function size(){dpr=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0)}
-size();addEventListener('resize',size);
-let mode='time',pts=[],total=0,frauds=0,mouseX=null,t=0;
-const CUT=.68;
-function spawn(){
-  const fraud=Math.random()<.035;
-  pts.push({x:W+4,y:H*(.15+.7*Math.random()),r:fraud?3.6:2.2,fraud,rand:Math.random(),flag:0,born:t});
-  total+=Math.floor(800+Math.random()*900);if(fraud)frauds++;
-}
-const rL=document.getElementById('rL'),note=document.getElementById('note'),leakBox=document.getElementById('leakBox');
-const bR=document.getElementById('bRand'),bT=document.getElementById('bTime');
-function setMode(m){mode=m;
-  bR.className=m==='rand'?'on bad':'';bT.className=m==='time'?'on good':'';
-  leakBox.className='leak '+(m==='rand'?'bad':'good');
-  note.innerHTML=m==='rand'
-    ?'<b>Random split:</b> training and test rows are shuffled together, so the model learns from purchases that happen <b>after</b> the ones it is tested on. The score looks great and means nothing.'
-    :'<b>Time split:</b> the model trains only on the past (blue) and is tested on the future (amber), the way it would really be used. This is how my fraud project is evaluated.';
-}
-bR.onclick=()=>{setMode('rand');leakShown=32;rL.textContent='32%'};bT.onclick=()=>{setMode('time');leakShown=0;rL.textContent='0%'};setMode('time');
-cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();mouseX=e.clientX-r.left});
-cv.addEventListener('pointerleave',()=>mouseX=null);
-const rN=document.getElementById('rN'),rF=document.getElementById('rF');
-let leakShown=0;
-function frame(){
-  t++;
-  if(t%3===0)spawn();
-  cx.clearRect(0,0,W,H);
-  const cut=W*CUT;
-  // zones
-  if(mode==='time'){
-    cx.fillStyle='rgba(77,163,255,.05)';cx.fillRect(0,0,cut,H);
-    cx.fillStyle='rgba(255,181,71,.06)';cx.fillRect(cut,0,W-cut,H);
-    cx.setLineDash([5,6]);cx.strokeStyle='rgba(232,237,243,.55)';cx.beginPath();cx.moveTo(cut,0);cx.lineTo(cut,H);cx.stroke();cx.setLineDash([]);
-    cx.font='500 11px JetBrains Mono, monospace';cx.fillStyle='#8b96a6';
-    const nar=W<520;cx.fillText(nar?'← TRAIN · past':'← TRAIN · the past',Math.max(8,cut-(nar?110:150)),18);cx.fillText(nar?'TEST':'TEST · the future →',cut+8,18);
-  }else{
-    cx.font='500 11px JetBrains Mono, monospace';cx.fillStyle='#ff3d5a';
-    cx.fillText('⚠ shuffled: future rows leak into training',10,18);
+/* reveal on scroll */
+(function () {
+  const io = new IntersectionObserver((es) => {
+    for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.rv').forEach((e) => io.observe(e));
+})();
+
+/* clock */
+(function () {
+  const el = document.getElementById('clock');
+  const tick = () => { el.textContent = new Date().toTimeString().slice(0, 8); };
+  tick(); setInterval(tick, 1000);
+})();
+
+/* boot */
+(function () {
+  const boot = document.getElementById('boot');
+  if (REDUCED) return;
+  const bp = boot.querySelector('.bp'), txt = boot.querySelector('.bt b');
+  for (let i = 0; i < 24; i++) {
+    const p = document.createElement('i');
+    p.style.left = (4 + Math.random() * 92) + '%'; p.style.top = (6 + Math.random() * 88) + '%';
+    if (i % 6 === 0) { p.style.width = '30px'; p.style.height = '3px'; }
+    p.style.animationDelay = (-Math.random() * 1.1).toFixed(2) + 's';
+    bp.appendChild(p);
   }
-  // time axis
-  cx.strokeStyle='#1f2733';cx.beginPath();cx.moveTo(0,H-22);cx.lineTo(W,H-22);cx.stroke();
-  cx.fillStyle='#5a6575';cx.font='10px JetBrains Mono, monospace';
-  cx.fillText('older',8,H-8);cx.fillText('time →',W-50,H-8);
-  let futureInTrain=0,trainCount=0;
-  for(let i=pts.length-1;i>=0;i--){
-    const p=pts[i];p.x-=.9;
-    if(p.x<-10){pts.splice(i,1);continue}
-    let isTrain=mode==='time'?p.x<cut:p.rand<CUT;
-    if(isTrain){trainCount++;if(p.x>=cut)futureInTrain++}
-    let col=isTrain?'77,163,255':'255,181,71';
-    if(p.fraud)col='255,61,90';
-    let a=.85;
-    if(mouseX!==null){const d=Math.abs(p.x-mouseX);a=d<60?1:.35}
-    cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fillStyle=`rgba(${col},${a})`;cx.fill();
-    if(p.fraud&&!isTrain){ // model flags fraud in the test zone
-      p.flag=Math.min(p.flag+.05,1);
-      cx.beginPath();cx.arc(p.x,p.y,7+5*(1-p.flag),0,7);cx.strokeStyle=`rgba(255,61,90,${.9*p.flag})`;cx.lineWidth=1.3;cx.stroke();cx.lineWidth=1;
+  let done = false; const T = [];
+  const at = (ms, fn) => T.push(setTimeout(fn, ms));
+  const zap = () => { boot.classList.remove('g'); void boot.offsetWidth; boot.classList.add('g'); };
+  function finish() {
+    if (done) return; done = true; T.forEach(clearTimeout);
+    boot.remove(); glitch(); countChips();
+  }
+  at(60, () => boot.classList.add('s1'));
+  at(330, () => { boot.classList.add('s2'); zap(); });
+  at(1180, () => { txt.textContent = 'Ankush Manhas'; txt.dataset.t = 'Ankush Manhas'; boot.classList.add('s3'); zap(); });
+  at(1820, () => { boot.classList.add('flip'); zap(); });
+  at(2280, () => boot.classList.add('s5'));
+  at(2500, () => boot.classList.add('s6'));
+  at(2720, finish);
+  boot.addEventListener('click', finish);
+  addEventListener('keydown', finish, { once: true });
+})();
+
+/* name glitch: short burst, rarely */
+const nameEl = document.getElementById('name');
+function glitch() {
+  if (REDUCED) return;
+  nameEl.classList.remove('g'); void nameEl.offsetWidth; nameEl.classList.add('g');
+  setTimeout(() => nameEl.classList.remove('g'), 450);
+}
+if (!REDUCED) {
+  (function loop() { setTimeout(() => { glitch(); loop(); }, 3800 + Math.random() * 3600); })();
+  nameEl.addEventListener('pointerenter', glitch);
+}
+
+/* tape counter */
+(function () {
+  const el = document.getElementById('vhs-t'), t0 = Date.now(), p = (n) => String(n).padStart(2, '0');
+  setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); el.textContent = 'SP ' + Math.floor(s / 3600) + ':' + p(Math.floor(s / 60) % 60) + ':' + p(s % 60); }, 1000);
+})();
+
+/* emblem feed */
+(function () {
+  const v = document.getElementById('emblem'), t = document.getElementById('em-t');
+  if (REDUCED) { v.autoplay = false; v.pause(); v.addEventListener('loadedmetadata', () => { v.currentTime = 6.5; }); return; }
+  v.play().catch(() => {});
+  setInterval(() => { t.textContent = v.currentTime.toFixed(1).padStart(4, '0'); }, 100);
+})();
+
+/* numbers count up after the opening */
+function countChips() {
+  document.querySelectorAll('.chip b').forEach((b) => {
+    const node = b.firstChild, end = parseFloat(node.nodeValue), dec = node.nodeValue.includes('.') ? 1 : 0;
+    let n = 0; const steps = 28;
+    const id = setInterval(() => {
+      n++; const p = 1 - Math.pow(1 - n / steps, 3);
+      node.nodeValue = (end * p).toFixed(dec);
+      if (n >= steps) { node.nodeValue = end.toFixed(dec); clearInterval(id); }
+    }, 32);
+  });
+}
+
+/* titles decode when they come into view */
+(function () {
+  if (REDUCED) return;
+  const GLY = '!<>-_\\/[]{}=+*^?#01';
+  function scramble(el) {
+    const nodes = [];
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    while (w.nextNode()) nodes.push([w.currentNode, w.currentNode.nodeValue]);
+    let f = 0; const total = 20;
+    const id = setInterval(() => {
+      f++;
+      for (const [n, s] of nodes) {
+        const shown = Math.floor(s.length * f / total);
+        let out = s.slice(0, shown);
+        for (let i = shown; i < s.length; i++) out += s[i] === ' ' ? ' ' : GLY[(Math.random() * GLY.length) | 0];
+        n.nodeValue = out;
+      }
+      if (f >= total) { for (const [n, s] of nodes) n.nodeValue = s; clearInterval(id); }
+    }, 34);
+  }
+  const io = new IntersectionObserver((es) => {
+    for (const e of es) if (e.isIntersecting) { scramble(e.target); io.unobserve(e.target); }
+  }, { threshold: 0.6 });
+  document.querySelectorAll('.j-head h2,.j-main h3,.pr h3,.gr h3,.it h4').forEach((e) => io.observe(e));
+})();
+
+/* hex stream, glitch bars, scroll band */
+(function () {
+  if (REDUCED) return;
+  const hex = document.getElementById('hex'), rows = [];
+  const row = () => '0x' + ((Math.random() * 0xffff) | 0).toString(16).toUpperCase().padStart(4, '0') + ' ' + ((Math.random() * 0xff) | 0).toString(16).toUpperCase().padStart(2, '0');
+  for (let i = 0; i < 9; i++) rows.push(row());
+  setInterval(() => { rows.shift(); rows.push(row()); hex.textContent = rows.join('\n'); }, 140);
+
+  const bars = document.getElementById('gbars').children;
+  (function zap() {
+    setTimeout(() => {
+      for (const b of bars) { b.style.top = Math.random() * 100 + '%'; b.style.height = 1 + Math.random() * 12 + 'px'; b.style.transform = 'translateX(' + (Math.random() * 30 - 15) + 'px)'; }
+      setTimeout(() => { for (const b of bars) b.style.height = '0'; }, 110);
+      zap();
+    }, 4200 + Math.random() * 5200);
+  })();
+
+  const band = document.getElementById('band'), a = band.children[0], b = band.children[1];
+  function move() {
+    const r = band.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    const p = (innerHeight - r.top) / (innerHeight + r.height);
+    a.style.transform = 'translateX(' + (-p * 34).toFixed(2) + '%)';
+    b.style.transform = 'translateX(' + (-34 + p * 34).toFixed(2) + '%)';
+  }
+  addEventListener('scroll', move, { passive: true }); move();
+})();
+
+/* cursor */
+(function () {
+  if (!matchMedia('(pointer:fine)').matches) return;
+  const c = document.getElementById('cur'), d = document.getElementById('cur-dot');
+  let x = innerWidth / 2, y = innerHeight / 2, cx = x, cy = y, run = false;
+  function f() {
+    cx += (x - cx) * 0.28; cy += (y - cy) * 0.28;
+    c.style.transform = 'translate(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px)';
+    if (Math.abs(x - cx) + Math.abs(y - cy) > 0.3) requestAnimationFrame(f); else run = false;
+  }
+  addEventListener('pointermove', (e) => {
+    x = e.clientX; y = e.clientY;
+    d.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    if (!run) { run = true; requestAnimationFrame(f); }
+  }, { passive: true });
+  document.addEventListener('pointerover', (e) => { c.classList.toggle('on', !!e.target.closest('a,button')); });
+})();
+
+/* scanner */
+(function () {
+  const cv = document.getElementById('scan'), ctx = cv.getContext('2d'), box = cv.parentElement;
+  const elThr = document.getElementById('n-thr');
+  const Y = '252,238,10', C = '0,240,255', R = '255,0,60';
+  const N = 170, pts = [], edges = [];
+  for (let i = 0; i < N; i++) {
+    const y = 1 - 2 * (i + 0.5) / N, r = Math.sqrt(1 - y * y), th = i * 2.399963;
+    pts.push({ x: Math.cos(th) * r, y: y, z: Math.sin(th) * r, bad: false, sx: 0, sy: 0, d: 0 });
+  }
+  const seen = new Set();
+  for (let i = 0; i < N; i++) {
+    const near = [];
+    for (let j = 0; j < N; j++) if (j !== i) {
+      const a = pts[i], b = pts[j];
+      near.push([(a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2, j]);
     }
-    if(mode==='rand'&&isTrain&&p.x>=cut&&(t+i)%40<20){
-      cx.beginPath();cx.arc(p.x,p.y,p.r+3,0,7);cx.strokeStyle='rgba(255,61,90,.5)';cx.stroke();
+    near.sort((p, q) => p[0] - q[0]);
+    for (let k = 0; k < 3; k++) {
+      const j = near[k][1], key = i < j ? i + '_' + j : j + '_' + i;
+      if (!seen.has(key)) { seen.add(key); edges.push([i, j]); }
     }
   }
-  if(mouseX!==null){cx.strokeStyle='rgba(232,237,243,.18)';cx.beginPath();cx.moveTo(mouseX,0);cx.lineTo(mouseX,H-22);cx.stroke()}
-  const leak=trainCount?futureInTrain/trainCount*100:0;
-  const now=performance.now(),dt=Math.min((now-(frame.last||now))/1000,1);frame.last=now;
-  leakShown+=(leak-leakShown)*(1-Math.exp(-dt*6));
-  rN.textContent=total.toLocaleString('en-IN');rF.textContent=frauds;rL.textContent=Math.round(leakShown)+'%';
+  const bad = [];
+  [9, 27, 44, 61, 78, 96, 113, 131, 149, 162].forEach((i, k) => {
+    pts[i].bad = true;
+    pts[i].id = 'CARD_' + (1000 + ((i * 7919) % 9000));
+    pts[i].score = (0.86 + ((k * 37) % 13) / 100).toFixed(2);
+    bad.push(pts[i]);
+  });
+  document.getElementById('n-nodes').textContent = N;
+
+  let W = 0, H = 0, cx = 0, cy = 0, Rad = 0;
+  let ay = 0.4, mx = 0, my = 0, tmx = 0, tmy = 0;
+  let target = bad[0], rx = 0, ry = 0, lockT = 0, sinceSwitch = 9, time = 0, last = 0, visible = true;
+
+  function size() {
+    const r = box.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    W = Math.max(1, r.width); H = Math.max(1, r.height);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx = W / 2; cy = H / 2; Rad = Math.min(W, H) * 0.34;
+  }
+
+  function project() {
+    const ax = 0.32 + my * 0.35, yy = ay + mx * 0.6;
+    const ca = Math.cos(yy), sa = Math.sin(yy), cb = Math.cos(ax), sb = Math.sin(ax);
+    for (const p of pts) {
+      const x1 = p.x * ca + p.z * sa, z1 = -p.x * sa + p.z * ca;
+      const y2 = p.y * cb - z1 * sb, z2 = p.y * sb + z1 * cb;
+      const k = 2.6 / (2.6 - z2);
+      p.sx = cx + x1 * Rad * k; p.sy = cy + y2 * Rad * k; p.d = (z2 + 1) / 2;
+    }
+  }
+
+  function pick() {
+    let best = null;
+    for (const b of bad) if (b !== target && (!best || b.d > best.d)) best = b;
+    target = best || target; lockT = 0; sinceSwitch = 0;
+  }
+
+  function arc(r, a0, a1, col, w, dash) {
+    ctx.setLineDash(dash || []);
+    ctx.strokeStyle = col; ctx.lineWidth = w;
+    ctx.beginPath(); ctx.arc(cx, cy, r, a0, a1); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    // rings
+    arc(Rad * 1.32, time * 0.25, time * 0.25 + 4.4, 'rgba(' + C + ',.35)', 1, [2, 7]);
+    arc(Rad * 1.46, -time * 0.4, -time * 0.4 + 1.2, 'rgba(' + Y + ',.9)', 2);
+    arc(Rad * 1.46, -time * 0.4 + 3.1, -time * 0.4 + 3.7, 'rgba(' + R + ',.9)', 2);
+    arc(Rad * 1.58, 0, 6.2832, 'rgba(' + C + ',.10)', 1);
+    // crosshair ticks
+    ctx.strokeStyle = 'rgba(' + C + ',.3)'; ctx.lineWidth = 1; ctx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const a = i * 1.5708; const c = Math.cos(a), s = Math.sin(a);
+      ctx.moveTo(cx + c * Rad * 1.58, cy + s * Rad * 1.58); ctx.lineTo(cx + c * Rad * 1.7, cy + s * Rad * 1.7);
+    }
+    ctx.stroke();
+    // edges
+    ctx.lineWidth = 1;
+    for (const e of edges) {
+      const a = pts[e[0]], b = pts[e[1]], d = (a.d + b.d) / 2;
+      const hot = a.bad || b.bad;
+      ctx.strokeStyle = 'rgba(' + (hot ? R : C) + ',' + (0.05 + d * d * (hot ? 0.6 : 0.34)) + ')';
+      ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke();
+    }
+    // nodes
+    for (const p of pts) {
+      const a = 0.15 + p.d * 0.85;
+      if (p.bad) {
+        ctx.fillStyle = 'rgba(' + R + ',' + a + ')';
+        ctx.shadowColor = 'rgb(' + R + ')'; ctx.shadowBlur = 12 * p.d;
+        ctx.fillRect(p.sx - 3, p.sy - 3, 6, 6);
+        ctx.shadowBlur = 0;
+      } else {
+        ctx.fillStyle = 'rgba(' + C + ',' + a * 0.9 + ')';
+        ctx.fillRect(p.sx - 1, p.sy - 1, 2, 2);
+      }
+    }
+    // reticle
+    const s = 13 + Math.max(0, 1 - lockT / 0.25) * 22, g = s * 0.45;
+    ctx.strokeStyle = 'rgb(' + Y + ')'; ctx.lineWidth = 2; ctx.beginPath();
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([dx, dy]) => {
+      ctx.moveTo(rx + dx * s, ry + dy * (s - g)); ctx.lineTo(rx + dx * s, ry + dy * s); ctx.lineTo(rx + dx * (s - g), ry + dy * s);
+    });
+    ctx.stroke();
+    // label
+    if (lockT > 0.22) {
+      const right = rx < cx, lx = rx + (right ? 1 : -1) * 34, ly = ry - 34;
+      const tw = 132, bx = Math.max(8, Math.min(W - tw - 8, right ? lx : lx - tw)), by = Math.max(8, ly - 40);
+      ctx.strokeStyle = 'rgba(' + Y + ',.9)'; ctx.lineWidth = 1; ctx.beginPath();
+      ctx.moveTo(rx + (right ? s : -s), ry - s); ctx.lineTo(lx, by + 40); ctx.lineTo(right ? bx + tw : bx, by + 40); ctx.stroke();
+      ctx.fillStyle = 'rgba(5,5,7,.86)'; ctx.fillRect(bx, by, tw, 40);
+      ctx.fillStyle = 'rgb(' + Y + ')'; ctx.fillRect(bx, by, 3, 40);
+      ctx.font = '500 10px "JetBrains Mono", monospace'; ctx.textBaseline = 'top';
+      const chars = Math.floor((lockT - 0.22) * 60);
+      ctx.fillStyle = 'rgb(' + Y + ')'; ctx.fillText(target.id.slice(0, chars), bx + 10, by + 7);
+      ctx.fillStyle = 'rgb(' + R + ')'; ctx.fillText(('SCORE ' + target.score + ' FLAGGED').slice(0, Math.max(0, chars - 9)), bx + 10, by + 22);
+    }
+  }
+
+  function step(dt) {
+    time += dt; ay += dt * 0.22; lockT += dt; sinceSwitch += dt;
+    mx += (tmx - mx) * Math.min(1, dt * 4); my += (tmy - my) * Math.min(1, dt * 4);
+    project();
+    if (sinceSwitch > 2.6 || target.d < 0.42) pick();
+    const k = 1 - Math.exp(-dt * 14);
+    rx += (target.sx - rx) * k; ry += (target.sy - ry) * k;
+  }
+
+  function frame(now) {
+    if (!visible) { last = 0; return; }
+    const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016; last = now;
+    step(dt); draw();
+    requestAnimationFrame(frame);
+  }
+
+  setInterval(() => { elThr.textContent = lockT > 0.22 ? target.score : (Math.random() * 0.2).toFixed(2); }, 180);
+  addEventListener('pointermove', (e) => { tmx = e.clientX / innerWidth - 0.5; tmy = e.clientY / innerHeight - 0.5; }, { passive: true });
+  new ResizeObserver(() => { size(); project(); draw(); }).observe(box);
+  size(); project(); pick(); rx = target.sx; ry = target.sy; lockT = 1; draw();
+  if (REDUCED) return;
+  new IntersectionObserver((en) => {
+    const was = visible; visible = en[0].isIntersecting;
+    if (visible && !was) requestAnimationFrame(frame);
+  }).observe(box);
   requestAnimationFrame(frame);
-}
-// prefill so the canvas is not empty on load
-for(let k=0;k<Math.ceil(W/.9/3);k++){spawn();pts[pts.length-1].x=W-k*3*.9}
-pts.sort((a,b)=>a.x-b.x);
-if(reduce){t=1;frame=(f=>()=>{f();})(frame)}
-requestAnimationFrame(frame);
-
-/* reveal, count-ups, bars */
-function count(el){const end=+el.dataset.count;if(reduce){el.textContent=end;return}
-  const t0=performance.now();(function f(n){const p=Math.min((n-t0)/1400,1);el.textContent=Math.round(end*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0)}
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target;el.classList.add('in');
-  el.querySelectorAll('[data-count]').forEach(count);el.querySelectorAll('.f').forEach(b=>b.style.width=b.dataset.w+'%');io.unobserve(el)}),
-  {threshold:0,rootMargin:'0px 0px -12% 0px'});
-document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+})();
 </script>
 </body>
 </html>
